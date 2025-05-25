@@ -1,5 +1,6 @@
 <?php
 // Model/entities/ServiceTypes.php
+namespace Model\entities;
 
 class ServiceTypes
 {

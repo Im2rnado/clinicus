@@ -1,19 +1,12 @@
 <?php
-// Model/interfaces/iHealthRecord.php
+// Model/interfaces/IHealthRecord.php
 namespace Model\interfaces;
 
-interface iHealthRecord {
-    /**
-     * Get health record data
-     * 
-     * @return array Record data
-     */
-    public function getData();
-    
-    /**
-     * Get health record description
-     * 
-     * @return string Record description
-     */
+interface IHealthRecord
+{
+    public function addRecord($data);
+    public function getRecord($id);
+    public function updateRecord($id, $data);
     public function getDescription();
+    public function getData();
 }

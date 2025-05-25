@@ -1,5 +1,6 @@
 <?php
 // Model/entities/UserTypePages.php
+namespace Model\entities;
 
 class UserTypePages
 {

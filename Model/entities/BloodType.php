@@ -1,6 +1,6 @@
 <?php
 // Model/entities/BloodType.php
-
+namespace Model\entities;
 class BloodType
 {
     public $ID;

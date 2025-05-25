@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Email.php
+namespace Model\entities;
 
 class Email
 {

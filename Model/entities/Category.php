@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Category.php
+namespace Model\entities;
 
 class Category
 {

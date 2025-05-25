@@ -1,5 +1,6 @@
 <?php
 // Model/entities/MessageUser.php
+namespace Model\entities;
 
 class MessageUser
 {

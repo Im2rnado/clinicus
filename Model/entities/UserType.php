@@ -1,5 +1,6 @@
 <?php
 // Model/entities/UserType.php
+namespace Model\entities;
 
 class UserType
 {
@@ -41,6 +42,19 @@ class UserType
             $stmt->close();
             return $type;
         }
+    }
+
+    public function readAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM User_Types");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $types = [];
+        while ($row = $res->fetch_assoc()) {
+            $types[] = $row;
+        }
+        $stmt->close();
+        return $types;
     }
 
     public function update($id, $data)

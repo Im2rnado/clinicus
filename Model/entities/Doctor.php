@@ -1,9 +1,12 @@
 <?php
 // Model/entities/Doctor.php
+namespace Model\entities;
 
-require_once 'User.php';
+require_once __DIR__ . '/../abstract/AbstractUser.php';
+use Model\abstract\AbstractUser;
+use Model\entities\User;
 
-class Doctor extends User
+class Doctor extends AbstractUser
 {
     public $ID;
     public $yearsOfExperince;
@@ -20,33 +23,70 @@ class Doctor extends User
         $this->conn = $db;
     }
 
-    public function create($data)
+    public function getUserById($userId)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Doctors (userID, yearsOfExperince, rating, docotrType) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("iiii", $data['userID'], $data['yearsOfExperince'], $data['rating'], $data['docotrType']);
-        $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+        return $this->read($userId);
     }
 
-    public function read($id = null)
+    public function createUser($userData)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Doctors");
-            $doctors = [];
-            while ($row = $result->fetch_object()) {
-                $doctors[] = $row;
-            }
-            return $doctors;
+        return $this->create($userData);
+    }
+
+    public function updateUser($userId, $userData)
+    {
+        return $this->update($userId, $userData);
+    }
+
+    public function deleteUser($userId)
+    {
+        return $this->delete($userId);
+    }
+
+    public function create($data)
+    {
+        // Create user first, then doctor record
+        $userCreated = false;
+        if (isset($data['user'])) {
+            $user = new User($this->conn);
+            $userCreated = $user->create($data['user']);
+            $userId = $this->conn->insert_id;
         } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Doctors WHERE ID = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $doctor = $res->fetch_object();
-            $stmt->close();
-            return $doctor;
+            $userId = $data['userID'];
+            $userCreated = true;
         }
+        if ($userCreated) {
+            $stmt = $this->conn->prepare("INSERT INTO Doctors (userID, yearsOfExperince, rating, docotrType) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiii", $userId, $data['yearsOfExperince'], $data['rating'], $data['docotrType']);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        }
+        return false;
+    }
+
+    public function read($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Doctors WHERE ID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $doctor = $res->fetch_object();
+        $stmt->close();
+        return $doctor;
+    }
+
+    public function readAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Doctors");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $doctors = [];
+        while ($row = $res->fetch_assoc()) {
+            $doctors[] = $row;
+        }
+        $stmt->close();
+        return $doctors;
     }
 
     public function update($id, $data)

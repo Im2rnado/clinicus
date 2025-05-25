@@ -1,5 +1,6 @@
 <?php
 // Model/entities/DosageForm.php
+namespace Model\entities;
 
 class DosageForm
 {

@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Languages.php
+namespace Model\entities;
 
 class Languages
 {

@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Unit.php
+namespace Model\entities;
 
 class Unit
 {

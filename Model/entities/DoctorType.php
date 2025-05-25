@@ -1,5 +1,6 @@
 <?php
 // Model/entities/DoctorType.php
+namespace Model\entities;
 
 class DoctorType
 {

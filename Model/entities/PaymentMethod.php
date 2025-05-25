@@ -1,7 +1,10 @@
 <?php
 // Model/entities/PaymentMethod.php
+namespace Model\entities;
 
-class PaymentMethod
+use IPayment;
+
+class PaymentMethod extends \AbstractPaymentMethod implements IPayment
 {
     public $ID;
     public $name;
@@ -11,9 +14,28 @@ class PaymentMethod
 
     public function __construct($db)
     {
-        $this->conn = $db;
+        parent::__construct($db);
     }
 
+    // Implement IPayment methods
+    public function processPayment($data)
+    {
+        // Example: Insert payment record or process logic
+        return $this->create($data);
+    }
+
+    public function validatePayment($data)
+    {
+        // Example: Validate payment data
+        return isset($data['name']) && !empty($data['name']);
+    }
+
+    public function getPaymentDetails($id)
+    {
+        return $this->read($id);
+    }
+
+    // Implement CRUD logic
     public function create($data)
     {
         $stmt = $this->conn->prepare("INSERT INTO Payment_Methods (name) VALUES (?)");
@@ -23,24 +45,15 @@ class PaymentMethod
         return $result;
     }
 
-    public function read($id = null)
+    public function read($id)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Payment_Methods");
-            $methods = [];
-            while ($row = $result->fetch_object()) {
-                $methods[] = $row;
-            }
-            return $methods;
-        } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Payment_Methods WHERE ID = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $method = $res->fetch_object();
-            $stmt->close();
-            return $method;
-        }
+        $stmt = $this->conn->prepare("SELECT * FROM Payment_Methods WHERE ID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $method = $res->fetch_object();
+        $stmt->close();
+        return $method;
     }
 
     public function update($id, $data)

@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Positions.php
+namespace Model\entities;
 
 class Positions
 {

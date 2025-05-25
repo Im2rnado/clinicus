@@ -4,7 +4,7 @@ class DatabaseConnection {
     private $server = "localhost";
     private $username = "root";
     private $password = "";
-    private $dbname = "clinicus";
+    private $dbname = "clinicus_db";
     private $port = 3307;
 
     public function connectToDB() {

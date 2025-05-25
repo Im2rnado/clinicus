@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Telephone.php
+namespace Model\entities;
 
 class Telephone
 {

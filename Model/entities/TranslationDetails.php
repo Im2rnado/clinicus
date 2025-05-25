@@ -1,5 +1,6 @@
 <?php
 // Model/entities/TranslationDetails.php
+namespace Model\entities;
 
 class TranslationDetails
 {

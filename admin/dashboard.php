@@ -1,30 +1,33 @@
 <?php
-require_once '../Model/read.php';
+require_once '../Model/config.php';
+require_once '../Model/autoload.php';
 
-$readModel = new ReadClass();
+use Model\entities\ModelFactory;
+
+$db = (new DatabaseConnection())->connectToDB();
 
 // Get some statistics for the dashboard
 try {
-    $users = $readModel->readAll('users');
-    $doctors = $readModel->readAll('doctors');
-    $patients = $readModel->readAll('patients');
-    $appointments = $readModel->readAll('appointments');
-    $prescriptions = $readModel->readAll('prescriptions');
-    $medications = $readModel->readAll('medications');
-    $staff = $readModel->readAll('staff');
-    $medicalHistory = $readModel->readAll('medical_history');
-    $auditLogs = $readModel->readAll('audit_logs');
+    $userModel = ModelFactory::getModelInstance('users', $db);
+    $doctorModel = ModelFactory::getModelInstance('doctors', $db);
+    $patientModel = ModelFactory::getModelInstance('patients', $db);
+    $appointmentModel = ModelFactory::getModelInstance('appointments', $db);
+    $prescriptionModel = ModelFactory::getModelInstance('prescriptions', $db);
+    $medicationModel = ModelFactory::getModelInstance('medications', $db);
+    $staffModel = ModelFactory::getModelInstance('staff', $db);
+    $medicalHistoryModel = ModelFactory::getModelInstance('medical_history', $db);
+    $auditLogModel = ModelFactory::getModelInstance('audit_logs', $db);
 
     $stats = [
-        'totalUsers' => count($users),
-        'totalDoctors' => count($doctors),
-        'totalPatients' => count($patients),
-        'totalAppointments' => count($appointments),
-        'totalPrescriptions' => count($prescriptions),
-        'totalMedications' => count($medications),
-        'totalStaff' => count($staff),
-        'totalMedicalHistory' => count($medicalHistory),
-        'totalAuditLogs' => count($auditLogs)
+        'totalUsers' => count($userModel->readAll()),
+        'totalDoctors' => count($doctorModel->readAll()),
+        'totalPatients' => count($patientModel->readAll()),
+        'totalAppointments' => count($appointmentModel->readAll()),
+        'totalPrescriptions' => count($prescriptionModel->readAll()),
+        'totalMedications' => count($medicationModel->readAll()),
+        'totalStaff' => count($staffModel->readAll()),
+        'totalMedicalHistory' => count($medicalHistoryModel->readAll()),
+        'totalAuditLogs' => count($auditLogModel->readAll())
     ];
 } catch (Exception $e) {
     $stats = [

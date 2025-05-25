@@ -1,6 +1,6 @@
 <?php
 // Model/entities/Appointment.php
-
+namespace Model\entities;
 class Appointment
 {
     public $ID;
@@ -45,6 +45,20 @@ class Appointment
             return $appointment;
         }
     }
+
+    public function readAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Appointment");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $appointments = [];
+        while ($row = $res->fetch_assoc()) {
+            $appointments[] = $row;
+        }
+        $stmt->close();
+        return $appointments;
+    }
+    
 
     public function update($id, $data)
     {

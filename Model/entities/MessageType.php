@@ -1,5 +1,6 @@
 <?php
 // Model/entities/MessageType.php
+namespace Model\entities;
 
 class MessageType
 {

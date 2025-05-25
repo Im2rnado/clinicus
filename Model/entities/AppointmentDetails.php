@@ -1,6 +1,6 @@
 <?php
 // Model/entities/AppointmentDetails.php
-
+namespace Model\entities;
 class AppointmentDetails
 {
     public $ID;

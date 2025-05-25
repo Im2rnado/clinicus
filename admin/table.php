@@ -1,100 +1,118 @@
-<div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
-        <h4><?php echo $tableName ?></h4>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-            Add New
-        </button>
-    </div>
-    <div class="card-body">
-        <div class="table-responsive">
-            <table class="table table-striped">
-                <thead>
-                    <tr>
-                        <?php foreach ($columns as $column): ?>
-                            <th><?php echo $column ?></th>
-                        <?php endforeach; ?>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($records as $record): ?>
-                        <tr>
-                            <?php foreach ($columns as $column): ?>
-                                <td>
-                                    <?php if ($column === 'Password'): ?>
-                                        ••••••••••
-                                    <?php else: ?>
-                                        <?php echo htmlspecialchars($record[$column]); ?>
-                                    <?php endif; ?>
-                                </td>
+<?php
+// admin/table.php
+require_once '../Model/config.php';
+require_once '../Model/autoload.php';
+
+use Model\entities\ModelFactory;
+
+// Get the table name from the URL
+$tableName = $_GET['table'] ?? '';
+
+// Get the model instance
+$db = (new DatabaseConnection())->connectToDB();
+if (empty($tableName)) {
+    throw new Exception("No table specified in the URL (expected ?table=tablename)");
+}
+$model = Model\entities\ModelFactory::getModelInstance($tableName, $db);
+$model = ModelFactory::getModelInstance($tableName, $db);
+
+// Get the records
+$records = $model->readAll();
+
+// Get the column names
+$columns = [];
+$primaryKey = 'id';
+if (!empty($records)) {
+    $columns = array_keys($records[0]);
+    if (!in_array('id', $columns)) {
+        // Try to find a column that ends with 'id' (case-insensitive)
+        foreach ($columns as $col) {
+            if (preg_match('/id$/i', $col)) {
+                $primaryKey = $col;
+                break;
+            }
+        }
+    }
+}
+?>
+
+<div class="container">
+    <h1>Manage <?php echo ucfirst($tableName); ?></h1>
+
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title"><?php echo ucfirst($tableName); ?> List</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createModal">
+                            Create New
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="table table-bordered table-striped">
+                        <thead>
+                            <tr>
+                                <?php foreach ($columns as $column): ?>
+                                    <th><?php echo ucfirst($column); ?></th>
+                                <?php endforeach; ?>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($records as $record): ?>
+                                <tr>
+                                    <?php foreach ($columns as $column): ?>
+                                        <td><?php echo $record[$column]; ?></td>
+                                    <?php endforeach; ?>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                            data-target="#editModal" data-id="<?php echo $record[$primaryKey]; ?>">
+                                            Edit
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
+                                            data-target="#deleteModal" data-id="<?php echo $record[$primaryKey]; ?>">
+                                            Delete
+                                        </button>
+                                    </td>
+                                </tr>
                             <?php endforeach; ?>
-                            <td>
-                                <button class="btn btn-sm btn-primary edit-btn" data-bs-toggle="modal"
-                                    data-bs-target="#editModal" data-id="<?php echo $record['Id'] ?>">Edit</button>
-                                <button class="btn btn-sm btn-danger delete-btn"
-                                    data-id="<?php echo $record['Id'] ?>">Delete</button>
-                            </td>
-                        </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Add Modal -->
-<div class="modal fade" id="addModal">
-    <div class="modal-dialog">
+<!-- Create Modal -->
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" aria-labelledby="createModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New <?php echo $tableName ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="createModalLabel">Create New <?php echo ucfirst($tableName); ?></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <form id="addRecordForm" method="post" action="/clinicus/admin/actions/create.php">
-                <input type="hidden" name="table" value="<?php echo $tableName; ?>">
+            <form action="/clinicus/admin/actions/create.php" method="POST">
                 <div class="modal-body">
-                    <?php
-                    foreach ($columns as $column):
-                        if ($column !== 'Id'):
-                            // Convert column name to a valid field name for the data array
-                            $fieldName = lcfirst($column);
-                            ?>
-                            <div class="mb-3">
-                                <label for="add_<?php echo $fieldName; ?>" class="form-label"><?php echo $column; ?></label>
-                                <?php
-                                // Special handling for foreign key fields
-                                if ($column === 'Role'):
-                                    $userTypes = $GLOBALS['readModel']->readAll('usertype');
-                                    ?>
-                                    <select class="form-select" id="add_<?php echo $fieldName; ?>" name="<?php echo $fieldName; ?>">
-                                        <option value="">Select Role</option>
-                                        <?php foreach ($userTypes as $userType): ?>
-                                            <option value="<?php echo $userType['Id']; ?>"><?php echo $userType['UserType']; ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                <?php elseif (stripos($column, 'DOB') !== false): ?>
-                                    <input type="date" class="form-control" id="add_<?php echo $fieldName; ?>"
-                                        name="<?php echo $fieldName; ?>" pattern="\d{4}-\d{2}-\d{2}" placeholder="yyyy-mm-dd"
-                                        title="Date format: yyyy-mm-dd">
-                                <?php elseif (stripos($column, 'Password') !== false): ?>
-                                    <input type="password" class="form-control" id="add_<?php echo $fieldName; ?>"
-                                        name="<?php echo $fieldName; ?>">
-                                <?php elseif (stripos($column, 'Email') !== false): ?>
-                                    <input type="email" class="form-control" id="add_<?php echo $fieldName; ?>"
-                                        name="<?php echo $fieldName; ?>">
-                                <?php else: ?>
-                                    <input type="text" class="form-control" id="add_<?php echo $fieldName; ?>"
-                                        name="<?php echo $fieldName; ?>">
-                                <?php endif; ?>
+                    <input type="hidden" name="table" value="<?php echo $tableName; ?>">
+                    <?php foreach ($columns as $column): ?>
+                        <?php if ($column !== 'id'): ?>
+                            <div class="form-group">
+                                <label for="<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
+                                <input type="text" class="form-control" id="<?php echo $column; ?>"
+                                    name="<?php echo $column; ?>" required>
                             </div>
-                            <?php
-                        endif;
-                    endforeach;
-                    ?>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Add Record</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Create</button>
                 </div>
             </form>
         </div>
@@ -102,101 +120,99 @@
 </div>
 
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal">
-    <div class="modal-dialog">
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Edit <?php echo $tableName ?></h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="editModalLabel">Edit <?php echo ucfirst($tableName); ?></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-            <form id="editRecordForm" method="post" action="/clinicus/admin/actions/update.php">
-                <input type="hidden" name="table" value="<?php echo $tableName; ?>">
-                <input type="hidden" name="id" id="edit_id">
+            <form action="/clinicus/admin/actions/update.php" method="POST">
                 <div class="modal-body">
+                    <input type="hidden" name="table" value="<?php echo $tableName; ?>">
+                    <input type="hidden" name="id" id="edit-id">
                     <?php foreach ($columns as $column): ?>
-                        <?php if ($column !== 'Id'): ?>
-                            <div class="mb-3">
-                                <label for="edit_<?php echo $column; ?>" class="form-label"><?php echo $column ?></label>
-                                <?php if ($column === 'Role'): ?>
-                                    <input type="text" class="form-control" id="edit_<?php echo $column; ?>"
-                                        name="<?php echo strtolower($column); ?>" readonly>
-                                <?php else: ?>
-                                    <input type="text" class="form-control" id="edit_<?php echo $column; ?>"
-                                        name="<?php echo strtolower($column); ?>">
-                                <?php endif; ?>
+                        <?php if ($column !== 'id'): ?>
+                            <div class="form-group">
+                                <label for="edit-<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
+                                <input type="text" class="form-control" id="edit-<?php echo $column; ?>"
+                                    name="<?php echo $column; ?>" required>
                             </div>
                         <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-primary">Save changes</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-primary">Update</button>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">Delete <?php echo ucfirst($tableName); ?></h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this record?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="delete-button">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-    // Script to handle record deletion
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            if (confirm('Are you sure you want to delete this record?')) {
-                const id = this.getAttribute('data-id');
-                const tableName = '<?php echo $tableName; ?>';
-
-                fetch(`/clinicus/admin/actions/delete.php?table=${tableName}&id=${id}`, {
-                    method: 'DELETE'
-                })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Record deleted successfully');
-                            location.reload();
-                        } else {
-                            alert('Error: ' + data.message);
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        alert('An error occurred while deleting the record');
-                    });
-            }
+    $(document).ready(function () {
+        // Edit button click
+        $('.btn-info').click(function () {
+            var id = $(this).data('id');
+            $.get('/clinicus/admin/actions/read.php', { table: '<?php echo $tableName; ?>', id: id }, function (data) {
+                if (data.success) {
+                    var record = data.record;
+                    $('#edit-id').val(record.id);
+                    <?php foreach ($columns as $column): ?>
+                        <?php if ($column !== 'id'): ?>
+                            $('#edit-<?php echo $column; ?>').val(record.<?php echo $column; ?>);
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                }
+            });
         });
-    });
 
-    // Script to handle edit button clicks
-    document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function () {
-            const id = this.getAttribute('data-id');
-            const tableName = '<?php echo $tableName; ?>';
+        // Delete button click
+        $('.btn-danger').click(function () {
+            var id = $(this).data('id');
+            $('#delete-button').data('id', id);
+        });
 
-            // Fetch record data for editing
-            fetch(`/clinicus/admin/actions/read.php?table=${tableName}&id=${id}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.record) {
-                        const record = data.record;
-                        document.getElementById('edit_id').value = id;
-
-                        Object.keys(record).forEach(key => {
-                            const input = document.getElementById(`edit_${key}`);
-                            if (input) {
-                                if (input.tagName === 'SELECT') {
-                                    input.value = record[key];
-                                } else {
-                                    input.value = record[key];
-                                }
-                            }
-                        });
+        // Delete confirmation
+        $('#delete-button').click(function () {
+            var id = $(this).data('id');
+            $.ajax({
+                url: '/clinicus/admin/actions/delete.php',
+                type: 'DELETE',
+                data: { table: '<?php echo $tableName; ?>', id: id },
+                success: function (data) {
+                    if (data.success) {
+                        location.reload();
                     } else {
                         alert('Error: ' + data.message);
                     }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('An error occurred while fetching the record');
-                });
+                }
+            });
         });
     });
 </script>

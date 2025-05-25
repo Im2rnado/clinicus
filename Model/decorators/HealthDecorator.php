@@ -2,20 +2,24 @@
 // Model/decorators/HealthDecorator.php
 namespace Model\decorators;
 
-use Model\interfaces\iHealthRecord;
+use Model\interfaces\IHealthRecord;
 
-abstract class HealthDecorator implements iHealthRecord {
+abstract class HealthDecorator implements IHealthRecord
+{
     protected $healthRecord;
-    
-    public function __construct(iHealthRecord $healthRecord) {
+
+    public function __construct(IHealthRecord $healthRecord)
+    {
         $this->healthRecord = $healthRecord;
     }
-    
-    public function getData() {
+
+    public function getData()
+    {
         return $this->healthRecord->getData();
     }
-    
-    public function getDescription() {
+
+    public function getDescription()
+    {
         return $this->healthRecord->getDescription();
     }
 }

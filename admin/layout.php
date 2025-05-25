@@ -60,53 +60,34 @@
             <div class="col-md-2 sidebar">
                 <h5 class="mb-3">Database Tables</h5>
                 <div class="list-group mb-4">
-                    <a href="/clinicus/admin"
-                        class="list-group-item list-group-item-action <?php echo !isset($tableName) ? 'active' : ''; ?>">
-                        <i class="bi bi-speedometer2"></i> Dashboard
-                    </a>
-                    <a href="/clinicus/admin/users"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'users' ? 'active' : ''; ?>">
-                        <i class="bi bi-people"></i> Users
-                    </a>
-                    <a href="/clinicus/admin/usertype"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'usertype' ? 'active' : ''; ?>">
-                        <i class="bi bi-person-badge"></i> User Types
-                    </a>
-                    <a href="/clinicus/admin/doctors"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'doctors' ? 'active' : ''; ?>">
-                        <i class="bi bi-clipboard2-pulse"></i> Doctors
-                    </a>
-                    <a href="/clinicus/admin/patients"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'patients' ? 'active' : ''; ?>">
-                        <i class="bi bi-person-plus"></i> Patients
-                    </a>
-                    <a href="/clinicus/admin/appointments"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'appointments' ? 'active' : ''; ?>">
-                        <i class="bi bi-calendar-check"></i> Appointments
-                    </a>
-                    <a href="/clinicus/admin/medical_history"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'medical_history' ? 'active' : ''; ?>">
-                        <i class="bi bi-journal-medical"></i> Medical History
-                    </a>
-                    <a href="/clinicus/admin/medications"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'medications' ? 'active' : ''; ?>">
-                        <i class="bi bi-file-earmark-medical"></i> Medications
-                    </a>
-                    <a href="/clinicus/admin/prescriptions"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'prescriptions' ? 'active' : ''; ?>">
-                        <i class="bi bi-file-earmark-medical"></i> Prescriptions
-                    </a>
-                    <a href="/clinicus/admin/staff"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'staff' ? 'active' : ''; ?>">
-                        <i class="bi bi-person-workspace"></i> Staff
-                    </a>
-                    <a href="/clinicus/admin/audit_logs"
-                        class="list-group-item list-group-item-action <?php echo isset($tableName) && $tableName == 'audit_logs' ? 'active' : ''; ?>">
-                        <i class="bi bi-list-check"></i> Audit Logs
-                    </a>
+                    <?php
+                    $menuItems = [
+                        ['url' => '/clinicus/admin/users?table=users', 'icon' => 'bi-people', 'text' => 'Users'],
+                        ['url' => '/clinicus/admin/usertype?table=usertype', 'icon' => 'bi-person-badge', 'text' => 'User Types'],
+                        ['url' => '/clinicus/admin/doctors?table=doctors', 'icon' => 'bi-clipboard2-pulse', 'text' => 'Doctors'],
+                        ['url' => '/clinicus/admin/patients?table=patients', 'icon' => 'bi-person-plus', 'text' => 'Patients'],
+                        ['url' => '/clinicus/admin/staff?table=staff', 'icon' => 'bi-person-workspace', 'text' => 'Staff'],
+                        ['url' => '/clinicus/admin/appointments?table=appointments', 'icon' => 'bi-calendar-check', 'text' => 'Appointments'],
+                        ['url' => '/clinicus/admin/medications?table=medications', 'icon' => 'bi-file-earmark-medical', 'text' => 'Medications'],
+                        ['url' => '/clinicus/admin/medical_history?table=medical_history', 'icon' => 'bi-journal-medical', 'text' => 'Medical History'],
+                        ['url' => '/clinicus/admin/audit_logs?table=audit_logs', 'icon' => 'bi-list-check', 'text' => 'Audit Logs'],
+                        ['url' => '/clinicus/admin/services?table=services', 'icon' => 'bi-briefcase', 'text' => 'Services'],
+                        ['url' => '/clinicus/admin/service_types?table=service_types', 'icon' => 'bi-tags', 'text' => 'Service Types'],
+                        ['url' => '/clinicus/admin/units?table=units', 'icon' => 'bi-rulers', 'text' => 'Units'],
+                        ['url' => '/clinicus/admin/user_type_pages?table=user_type_pages', 'icon' => 'bi-file-earmark', 'text' => 'User Type Pages'],
+                        ['url' => '/clinicus/admin/words?table=words', 'icon' => 'bi-translate', 'text' => 'Words'],
+                    ];
+
+                    foreach ($menuItems as $item) {
+                        $isActive = (isset($tableName) && strpos($item['url'], "table.php?table=$tableName") !== false) ? 'active' : '';
+                        echo '<a href="' . $item['url'] . '" class="list-group-item list-group-item-action ' . $isActive . '">';
+                        echo '<i class="bi ' . $item['icon'] . '"></i> ' . $item['text'];
+                        echo '</a>';
+                    }
+                    ?>
                 </div>
             </div>
-            <!-- Notification system kind of -->
+            <!-- Notification system -->
             <div class="col-md-10 content-wrapper">
                 <?php if (isset($_GET['success'])): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -126,7 +107,14 @@
 
                 <?php if (isset($_GET['error'])): ?>
                     <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        Error: <?php echo htmlspecialchars($_GET['error']); ?>
+                        <?php
+                        $error = $_GET['error'];
+                        if ($error === 'invalid_table') {
+                            echo 'Invalid table name specified';
+                        } else {
+                            echo htmlspecialchars($error);
+                        }
+                        ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <?php endif; ?>
@@ -137,6 +125,7 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </body>
 
 </html>

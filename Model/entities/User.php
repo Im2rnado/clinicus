@@ -1,7 +1,12 @@
 <?php
 // Model/entities/User.php
 
-class User
+namespace Model\entities;
+
+use Model\abstract\AbstractUser;
+use Model\interfaces\ILogUser;
+
+class User extends AbstractUser implements ILogUser
 {
     public $userID;
     public $FirstName;
@@ -18,9 +23,30 @@ class User
 
     public function __construct($db)
     {
-        $this->conn = $db;
+        parent::__construct($db);
     }
 
+    public function getUserById($userId)
+    {
+        return $this->read($userId);
+    }
+
+    public function createUser($userData)
+    {
+        return $this->create($userData);
+    }
+
+    public function updateUser($userId, $userData)
+    {
+        return $this->update($userId, $userData);
+    }
+
+    public function deleteUser($userId)
+    {
+        return $this->delete($userId);
+    }
+
+    // Implement abstract CRUD methods
     public function create($data)
     {
         $stmt = $this->conn->prepare("INSERT INTO Users (FirstName, LastName, username, password, dob, addressID, roleID) VALUES (?, ?, ?, ?, ?, ?, ?)");
@@ -30,25 +56,29 @@ class User
         return $result;
     }
 
-    public function read($id = null)
+    public function read($id)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Users");
-            $users = [];
-            while ($row = $result->fetch_object()) {
-                $users[] = $row;
-            }
-            return $users;
-        } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Users WHERE userID = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $user = $res->fetch_object();
-            $stmt->close();
-            return $user;
-        }
+        $stmt = $this->conn->prepare("SELECT * FROM Users WHERE userID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $user = $res->fetch_object();
+        $stmt->close();
+        return $user;
     }
+
+    public function readAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Users");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $users = [];
+        while ($row = $res->fetch_assoc()) {
+            $users[] = $row;
+        }
+        $stmt->close();
+        return $users;
+    }   
 
     public function update($id, $data)
     {

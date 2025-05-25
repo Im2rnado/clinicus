@@ -1,5 +1,6 @@
 <?php
 // Model/entities/RenderPaymentMethods.php
+namespace Model\entities;
 
 class RenderPaymentMethods
 {

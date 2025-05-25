@@ -1,7 +1,10 @@
 <?php
 // Model/entities/Messages.php
+namespace Model\entities;
 
-class Messages
+use IMessageSender;
+
+class Messages implements IMessageSender
 {
     public $Id;
     public $messageTemplate;
@@ -15,6 +18,29 @@ class Messages
         $this->conn = $db;
     }
 
+    // Implement IMessageSender methods
+    public function sendMessage($recipient, $message)
+    {
+        // Example: Insert message into Messages table
+        $stmt = $this->conn->prepare("INSERT INTO Messages (messageTemplate, typeID) VALUES (?, ?)");
+        $stmt->bind_param("si", $message, $recipient); // Here, recipient is typeID for demo
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function getMessageStatus($messageId)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Messages WHERE Id = ?");
+        $stmt->bind_param("i", $messageId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $message = $res->fetch_object();
+        $stmt->close();
+        return $message;
+    }
+
+    // Basic CRUD logic for Messages
     public function create($data)
     {
         $stmt = $this->conn->prepare("INSERT INTO Messages (messageTemplate, typeID) VALUES (?, ?)");
@@ -24,24 +50,15 @@ class Messages
         return $result;
     }
 
-    public function read($id = null)
+    public function read($id)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Messages");
-            $messages = [];
-            while ($row = $result->fetch_object()) {
-                $messages[] = $row;
-            }
-            return $messages;
-        } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Messages WHERE Id = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $message = $res->fetch_object();
-            $stmt->close();
-            return $message;
-        }
+        $stmt = $this->conn->prepare("SELECT * FROM Messages WHERE Id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $message = $res->fetch_object();
+        $stmt->close();
+        return $message;
     }
 
     public function update($id, $data)

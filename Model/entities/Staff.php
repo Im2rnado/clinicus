@@ -1,9 +1,12 @@
 <?php
 // Model/entities/Staff.php
+namespace Model\entities;
 
-require_once 'User.php';
+require_once __DIR__ . '/../abstract/AbstractUser.php';
+use Model\abstract\AbstractUser;
+use Model\entities\User;
 
-class Staff extends User
+class Staff extends AbstractUser
 {
     public $ID;
     public $userID;
@@ -21,33 +24,70 @@ class Staff extends User
         $this->conn = $db;
     }
 
-    public function create($data)
+    public function getUserById($userId)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Staff (userID, hiredAt, departmentID, positionID) VALUES (?, ?, ?, ?)");
-        $stmt->bind_param("isii", $data['userID'], $data['hiredAt'], $data['departmentID'], $data['positionID']);
-        $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+        return $this->read($userId);
     }
 
-    public function read($id = null)
+    public function createUser($userData)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Staff");
-            $staffs = [];
-            while ($row = $result->fetch_object()) {
-                $staffs[] = $row;
-            }
-            return $staffs;
+        return $this->create($userData);
+    }
+
+    public function updateUser($userId, $userData)
+    {
+        return $this->update($userId, $userData);
+    }
+
+    public function deleteUser($userId)
+    {
+        return $this->delete($userId);
+    }
+
+    public function create($data)
+    {
+        // Create user first, then staff record
+        $userCreated = false;
+        if (isset($data['user'])) {
+            $user = new User($this->conn);
+            $userCreated = $user->create($data['user']);
+            $userId = $this->conn->insert_id;
         } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Staff WHERE ID = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $staff = $res->fetch_object();
-            $stmt->close();
-            return $staff;
+            $userId = $data['userID'];
+            $userCreated = true;
         }
+        if ($userCreated) {
+            $stmt = $this->conn->prepare("INSERT INTO Staff (userID, hiredAt, departmentID, positionID) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("isii", $userId, $data['hiredAt'], $data['departmentID'], $data['positionID']);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        }
+        return false;
+    }
+
+    public function read($id)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Staff WHERE ID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $staff = $res->fetch_object();
+        $stmt->close();
+        return $staff;
+    }
+
+    public function readAll()
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Staff");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $staff = [];
+        while ($row = $res->fetch_assoc()) {
+            $staff[] = $row;
+        }
+        $stmt->close();
+        return $staff;
     }
 
     public function update($id, $data)

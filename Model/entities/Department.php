@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Department.php
+namespace Model\entities;
 
 class Department
 {

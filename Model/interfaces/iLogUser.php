@@ -2,7 +2,8 @@
 // Model/interfaces/iLogUser.php
 namespace Model\interfaces;
 
-interface iLogUser {
+interface ILogUser
+{
     /**
      * Log user activity
      * 
@@ -12,7 +13,7 @@ interface iLogUser {
      * @return bool Success status
      */
     public function logUserActivity($userId, $action, $details = []);
-    
+
     /**
      * Get user activity logs
      * 

@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Pages.php
+namespace Model\entities;
 
 class Pages
 {

@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Word.php
+namespace Model\entities;
 
 class Word
 {

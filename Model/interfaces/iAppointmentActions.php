@@ -2,7 +2,7 @@
 // Model/interfaces/iAppointmentActions.php
 namespace Model\interfaces;
 
-interface iAppointmentActions {
+interface IAppointmentActions {
     /**
      * Schedule a new appointment
      * 

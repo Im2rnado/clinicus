@@ -1,7 +1,11 @@
 <?php
 // Model/entities/MedicalHistory.php
+namespace Model\entities;
 
-class MedicalHistory
+use AbstractMedicalHistory;
+use Model\interfaces\IHealthRecord;
+
+class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
 {
     public $ID;
     public $patientID;
@@ -15,9 +19,36 @@ class MedicalHistory
 
     public function __construct($db)
     {
-        $this->conn = $db;
+        parent::__construct($db);
     }
 
+    // Implement IHealthRecord methods
+    public function addRecord($data)
+    {
+        return $this->create($data);
+    }
+
+    public function getRecord($id)
+    {
+        return $this->read($id);
+    }
+
+    public function getData()
+    {
+        return $this->getHistory();
+    }
+
+    public function getDescription()
+    {
+        return $this->description;
+    }
+
+    public function updateRecord($id, $data)
+    {
+        return $this->update($id, $data);
+    }
+
+    // Implement CRUD logic
     public function create($data)
     {
         $stmt = $this->conn->prepare("INSERT INTO Medical_History (patientID, serviceID, appointmentID, description, createdBy) VALUES (?, ?, ?, ?, ?)");
@@ -27,24 +58,15 @@ class MedicalHistory
         return $result;
     }
 
-    public function read($id = null)
+    public function read($id)
     {
-        if ($id === null) {
-            $result = $this->conn->query("SELECT * FROM Medical_History");
-            $histories = [];
-            while ($row = $result->fetch_object()) {
-                $histories[] = $row;
-            }
-            return $histories;
-        } else {
-            $stmt = $this->conn->prepare("SELECT * FROM Medical_History WHERE ID = ?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $res = $stmt->get_result();
-            $history = $res->fetch_object();
-            $stmt->close();
-            return $history;
-        }
+        $stmt = $this->conn->prepare("SELECT * FROM Medical_History WHERE ID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $history = $res->fetch_object();
+        $stmt->close();
+        return $history;
     }
 
     public function update($id, $data)
@@ -63,5 +85,24 @@ class MedicalHistory
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    public function deleteRecord($recordId)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM Medical_History WHERE ID = ?");
+        $stmt->bind_param("i", $recordId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function getHistory()
+    {
+        $result = $this->conn->query("SELECT * FROM Medical_History");
+        $histories = [];
+        while ($row = $result->fetch_object()) {
+            $histories[] = $row;
+        }
+        return $histories;
     }
 }

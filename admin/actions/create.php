@@ -1,5 +1,8 @@
 <?php
-require_once "../../Model/create.php";
+require_once "../../Model/config.php";
+require_once "../../Model/entities/ModelFactory.php";
+
+use Model\entities\ModelFactory;
 
 try {
     if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['table'])) {
@@ -7,13 +10,12 @@ try {
     }
 
     $tableName = $_POST['table'];
-
-    // Remove the table field from POST data
     $data = $_POST;
     unset($data['table']);
 
-    $createModel = new CreateClass();
-    $result = $createModel->insertRecord($tableName, data: $data);
+    $db = (new DatabaseConnection())->connectToDB();
+    $model = ModelFactory::getModelInstance($tableName, $db);
+    $result = $model->create($data);
 
     if ($result) {
         header("Location: /clinicus/admin/{$tableName}?success=created");

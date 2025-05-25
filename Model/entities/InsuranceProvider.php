@@ -1,5 +1,6 @@
 <?php
 // Model/entities/InsuranceProvider.php
+namespace Model\entities;
 
 class InsuranceProvider
 {

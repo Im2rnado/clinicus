@@ -1,5 +1,6 @@
 <?php
 // Model/entities/PaymentMethodOption.php
+namespace Model\entities;
 
 class PaymentMethodOption
 {

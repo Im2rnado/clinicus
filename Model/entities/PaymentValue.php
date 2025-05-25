@@ -1,5 +1,6 @@
 <?php
 // Model/entities/PaymentValue.php
+namespace Model\entities;
 
 class PaymentValue
 {

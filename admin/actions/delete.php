@@ -1,27 +1,26 @@
 <?php
-header('Content-Type: application/json');
-require_once "../../Model/delete.php";
+require_once "../../Model/config.php";
+require_once "../../Model/autoload.php";
+
+use Model\entities\ModelFactory;
 
 try {
-    // Parse from URL for actual DELETE requests
-    parse_str($_SERVER['QUERY_STRING'], $params);
-    if ($_SERVER['REQUEST_METHOD'] !== 'DELETE' || !isset($params['table']) || !isset($params['id'])) {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST' || !isset($_POST['table']) || !isset($_POST['id'])) {
         throw new Exception("Invalid request method or missing required parameters");
     }
 
-    $tableName = $params['table'];
-    $id = $params['id'];
+    $tableName = $_POST['table'];
+    $id = $_POST['id'];
 
-    $deleteModel = new DeleteClass();
-    $result = $deleteModel->delete($tableName, $id);
+    $db = (new DatabaseConnection())->connectToDB();
+    $model = ModelFactory::getModelInstance($tableName, $db);
+    $result = $model->delete($id);
 
-    echo json_encode([
-        'success' => true,
-        'message' => 'Record deleted successfully'
-    ]);
+    if ($result) {
+        header("Location: /clinicus/admin/{$tableName}?success=deleted");
+    } else {
+        header("Location: /clinicus/admin/{$tableName}?error=delete_failed");
+    }
 } catch (Exception $e) {
-    echo json_encode([
-        'success' => false,
-        'message' => $e->getMessage()
-    ]);
+    header("Location: /clinicus/admin/{$tableName}?error=" . urlencode($e->getMessage()));
 }

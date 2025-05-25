@@ -1,5 +1,6 @@
 <?php
 // Model/entities/Address.php
+namespace Model\entities;
 
 class Address
 {

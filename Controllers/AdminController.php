@@ -1,21 +1,23 @@
 <?php
 
-require_once "../Model/read.php";
+require_once "../Model/config.php";
+require_once "../Model/autoload.php";
+
+use Model\entities\ModelFactory;
 
 class AdminController
 {
-    private $readModel;
+    private $db;
 
     public function __construct()
     {
-        $this->readModel = new ReadClass();
-        $GLOBALS['readModel'] = $this->readModel; // Make it available globally
+        $this->db = (new DatabaseConnection())->connectToDB();
     }
 
     protected function renderAdmin($view, $data = [])
     {
         extract($data);
- 
+
         ob_start(); // ob is used to start capturing would normally be printed to the screen
         require_once "../$view.php"; // loads the view file and captures its output instead of displaying
         $content = ob_get_clean(); // stores everyhting in content
@@ -33,8 +35,8 @@ class AdminController
     public function manageTable($tableName)
     {
         try {
-            // Get table data
-            $records = $this->readModel->readAll($tableName);
+            $model = ModelFactory::getModelInstance($tableName, $this->db);
+            $records = $model->readAll();
 
             // Get column names (from first record)
             $columns = [];
