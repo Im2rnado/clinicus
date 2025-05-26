@@ -58,7 +58,7 @@ class Appointment
         $stmt->close();
         return $appointments;
     }
-    
+
 
     public function update($id, $data)
     {

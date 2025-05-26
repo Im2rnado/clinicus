@@ -78,7 +78,7 @@ class User extends AbstractUser implements ILogUser
         }
         $stmt->close();
         return $users;
-    }   
+    }
 
     public function update($id, $data)
     {
@@ -96,5 +96,29 @@ class User extends AbstractUser implements ILogUser
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    // --- Functions from class diagram ---
+    public function login($username, $password): bool
+    {
+        // TODO: Implement login logic
+        return false;
+    }
+
+    public function logout(): void
+    {
+        // TODO: Implement logout logic
+    }
+
+    public function resetPassword($email): bool
+    {
+        // TODO: Implement password reset logic
+        return false;
+    }
+
+    public function updateProfile($data): bool
+    {
+        // TODO: Implement profile update logic
+        return false;
     }
 }
