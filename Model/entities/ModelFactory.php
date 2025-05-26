@@ -23,15 +23,28 @@ class ModelFactory
             'words' => 'Word',
             'translations' => 'Translation',
             'translation_details' => 'TranslationDetail',
-            'payment_methods' => 'PaymentMethod',
-            'payment_method_options' => 'PaymentMethodOption',
-            'payment_method_values' => 'PaymentMethodValue',
-            'payment_options' => 'PaymentOption',
-            'payment_values' => 'PaymentValue',
+            'payment_method' => 'PaymentMethod',
+            'payment_method_option' => 'PaymentMethodOption',
+            'payment_value' => 'PaymentValue',
+            'payment_option' => 'PaymentOption',
             'positions' => 'Position',
             'render_payment_methods' => 'RenderPaymentMethod',
-
-            // Add more entities as needed
+            'address' => 'Address',
+            'appointment_details' => 'AppointmentDetail',
+            'blood_type' => 'BloodType',
+            'category' => 'Category',
+            'department' => 'Department',
+            'doctor_type' => 'DoctorType',
+            'dosage_form' => 'DosageForm',
+            'email' => 'Email',
+            'insurance_provider' => 'InsuranceProvider',
+            'languages' => 'Language',
+            'medication_info' => 'MedicationInfo',
+            'messages' => 'Message',
+            'message_type' => 'MessageType',
+            'pages' => 'Page',
+            'patient_insurance' => 'PatientInsurance',
+            'telephone' => 'Telephone'
         ];
         if (!isset($map[$tableName])) {
             $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
