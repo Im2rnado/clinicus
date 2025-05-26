@@ -77,4 +77,41 @@ class Appointment
         $stmt->close();
         return $result;
     }
+
+    // --- Appointment class diagram methods ---
+    public function schedule($doctorId, $userId, $date, $status = 'scheduled')
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Appointment (DoctorID, userID, appointmentDate, status) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $doctorId, $userId, $date, $status);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function cancel($appointmentId)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET status = 'cancelled' WHERE ID = ?");
+        $stmt->bind_param("i", $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function reschedule($appointmentId, $newDate)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET appointmentDate = ? WHERE ID = ?");
+        $stmt->bind_param("si", $newDate, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function requestFollowUp($appointmentId, $notes = null)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET followUpRequested = 1, followUpNotes = ? WHERE ID = ?");
+        $stmt->bind_param("si", $notes, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
 }

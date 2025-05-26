@@ -3,7 +3,5 @@
 
 interface IPayment
 {
-    public function processPayment($data);
-    public function validatePayment($data);
-    public function getPaymentDetails($id);
+    public function executePayment($paymentId);
 }

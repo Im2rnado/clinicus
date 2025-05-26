@@ -106,4 +106,50 @@ class Doctor extends AbstractUser
         $stmt->close();
         return $result;
     }
+
+    // --- Doctor class diagram methods ---
+    public function createPrescription($patientId, $details)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Prescription (doctorID, patientID, details) VALUES (?, ?, ?)");
+        $stmt->bind_param("iis", $this->ID, $patientId, $details);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function schedule($patientId, $date, $status = 'scheduled')
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Appointment (DoctorID, userID, appointmentDate, status) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $this->ID, $patientId, $date, $status);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function cancel($appointmentId)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET status = 'cancelled' WHERE ID = ?");
+        $stmt->bind_param("i", $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function reschedule($appointmentId, $newDate)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET appointmentDate = ? WHERE ID = ?");
+        $stmt->bind_param("si", $newDate, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function requestFollowUp($appointmentId, $notes = null)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET followUpRequested = 1, followUpNotes = ? WHERE ID = ?");
+        $stmt->bind_param("si", $notes, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
 }

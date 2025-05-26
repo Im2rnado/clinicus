@@ -4,7 +4,7 @@ namespace Model\entities;
 
 use IPayment;
 
-class PaymentMethod extends \AbstractPaymentMethod implements IPayment
+class PaymentMethod extends \AbstractPaymentMethod
 {
     public $ID;
     public $name;
@@ -18,10 +18,13 @@ class PaymentMethod extends \AbstractPaymentMethod implements IPayment
     }
 
     // Implement IPayment methods
-    public function processPayment($data)
+    public function processPayment($paymentId)
     {
-        // Example: Insert payment record or process logic
-        return $this->create($data);
+        $stmt = $this->conn->prepare("UPDATE Payment SET status = 'processed' WHERE ID = ?");
+        $stmt->bind_param("i", $paymentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
     }
 
     public function validatePayment($data)
@@ -69,6 +72,27 @@ class PaymentMethod extends \AbstractPaymentMethod implements IPayment
     {
         $stmt = $this->conn->prepare("DELETE FROM Payment_Methods WHERE ID = ?");
         $stmt->bind_param("i", $id);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    // --- Payment class diagram methods ---
+    public function invoiceLog($paymentId)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Invoice WHERE paymentID = ?");
+        $stmt->bind_param("i", $paymentId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $invoices = $res->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $invoices;
+    }
+
+    public function addAttribute($paymentId, $attribute, $value)
+    {
+        $stmt = $this->conn->prepare("UPDATE Payment SET $attribute = ? WHERE ID = ?");
+        $stmt->bind_param("si", $value, $paymentId);
         $result = $stmt->execute();
         $stmt->close();
         return $result;

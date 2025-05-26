@@ -98,27 +98,87 @@ class User extends AbstractUser implements ILogUser
         return $result;
     }
 
-    // --- Functions from class diagram ---
-    public function login($username, $password): bool
+    // --- User class diagram methods with full logic ---
+    public function login($username, $password)
     {
-        // TODO: Implement login logic
+        $stmt = $this->conn->prepare("SELECT * FROM Users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $user = $res->fetch_assoc();
+        $stmt->close();
+        if ($user && password_verify($password, $user['password'])) {
+            // Set session or token logic here
+            $_SESSION['userID'] = $user['userID'];
+            return true;
+        }
         return false;
     }
 
-    public function logout(): void
+    public function logout()
     {
-        // TODO: Implement logout logic
+        // Destroy session or token logic
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        session_unset();
+        session_destroy();
+        return true;
+    }
+
+    public function updateProfile($userId, $data)
+    {
+        $fields = [];
+        $params = [];
+        $types = '';
+        foreach ($data as $key => $value) {
+            $fields[] = "$key = ?";
+            $params[] = $value;
+            $types .= 's';
+        }
+        $params[] = $userId;
+        $types .= 'i';
+        $sql = "UPDATE Users SET " . implode(", ", $fields) . " WHERE userID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function deleteAccount($userId)
+    {
+        $stmt = $this->conn->prepare("DELETE FROM Users WHERE userID = ?");
+        $stmt->bind_param("i", $userId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function changePassword($userId, $oldPassword, $newPassword)
+    {
+        // Verify old password
+        $stmt = $this->conn->prepare("SELECT password FROM Users WHERE userID = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $user = $res->fetch_assoc();
+        $stmt->close();
+        if (!$user || !password_verify($oldPassword, $user['password'])) {
+            return false;
+        }
+        // Update to new password
+        $newPasswordHash = password_hash($newPassword, PASSWORD_DEFAULT);
+        $stmt = $this->conn->prepare("UPDATE Users SET password = ? WHERE userID = ?");
+        $stmt->bind_param("si", $newPasswordHash, $userId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
     }
 
     public function resetPassword($email): bool
     {
         // TODO: Implement password reset logic
-        return false;
-    }
-
-    public function updateProfile($data): bool
-    {
-        // TODO: Implement profile update logic
         return false;
     }
 }

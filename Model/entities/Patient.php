@@ -99,4 +99,108 @@ class Patient extends AbstractUser
         $stmt->close();
         return $result;
     }
+
+    // --- Patient class diagram methods ---
+    public function requestMedicalHistory($patientId)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM MedicalHistory WHERE patientID = ?");
+        $stmt->bind_param("i", $patientId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        $history = $res->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $history;
+    }
+
+    public function requestFollowUp($appointmentId, $notes = null)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET followUpRequested = 1, followUpNotes = ? WHERE ID = ?");
+        $stmt->bind_param("si", $notes, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function reschedule($appointmentId, $newDate)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET appointmentDate = ? WHERE ID = ?");
+        $stmt->bind_param("si", $newDate, $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function cancel($appointmentId)
+    {
+        $stmt = $this->conn->prepare("UPDATE Appointment SET status = 'cancelled' WHERE ID = ?");
+        $stmt->bind_param("i", $appointmentId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function schedule($doctorId, $userId, $date, $status = 'scheduled')
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Appointment (DoctorID, userID, appointmentDate, status) VALUES (?, ?, ?, ?)");
+        $stmt->bind_param("iiss", $doctorId, $userId, $date, $status);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function updateContactInfo($patientId, $contactData)
+    {
+        $fields = [];
+        $params = [];
+        $types = '';
+        foreach ($contactData as $key => $value) {
+            $fields[] = "$key = ?";
+            $params[] = $value;
+            $types .= 's';
+        }
+        $params[] = $patientId;
+        $types .= 'i';
+        $sql = "UPDATE Patients SET " . implode(", ", $fields) . " WHERE ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function rateDoctor($doctorId, $rating)
+    {
+        $stmt = $this->conn->prepare("UPDATE Doctors SET rating = ? WHERE ID = ?");
+        $stmt->bind_param("ii", $rating, $doctorId);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function requestPrescription($patientId, $doctorId, $details)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Prescription (patientID, doctorID, details) VALUES (?, ?, ?)");
+        $stmt->bind_param("iis", $patientId, $doctorId, $details);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function makePayment($patientId, $amount, $method)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Payment (patientID, amount, method) VALUES (?, ?, ?)");
+        $stmt->bind_param("ids", $patientId, $amount, $method);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
+
+    public function payForAppointment($appointmentId, $amount, $method)
+    {
+        $stmt = $this->conn->prepare("INSERT INTO Payment (appointmentID, amount, method) VALUES (?, ?, ?)");
+        $stmt->bind_param("ids", $appointmentId, $amount, $method);
+        $result = $stmt->execute();
+        $stmt->close();
+        return $result;
+    }
 }
