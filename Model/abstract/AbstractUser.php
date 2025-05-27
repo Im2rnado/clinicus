@@ -2,6 +2,7 @@
 // Model/abstract/AbstractUser.php
 namespace Model\abstract;
 
+include_once __DIR__ . "/../interfaces/ILogUser.php";
 use Model\interfaces\ILogUser;
 
 abstract class AbstractUser implements ILogUser

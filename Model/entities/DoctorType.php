@@ -5,7 +5,7 @@ namespace Model\entities;
 class DoctorType
 {
     public $ID;
-    public $Specilization;
+    public $Specialization;
     public $createdAt;
     public $updatedAt;
     private $conn;
@@ -17,8 +17,8 @@ class DoctorType
 
     public function create($data)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Doctor_Types (Specilization) VALUES (?)");
-        $stmt->bind_param("s", $data['Specilization']);
+        $stmt = $this->conn->prepare("INSERT INTO Doctor_Types (Specialization) VALUES (?)");
+        $stmt->bind_param("s", $data['Specialization']);
         $result = $stmt->execute();
         $stmt->close();
         return $result;
@@ -46,8 +46,8 @@ class DoctorType
 
     public function update($id, $data)
     {
-        $stmt = $this->conn->prepare("UPDATE Doctor_Types SET Specilization = ? WHERE ID = ?");
-        $stmt->bind_param("si", $data['Specilization'], $id);
+        $stmt = $this->conn->prepare("UPDATE Doctor_Types SET Specialization = ? WHERE ID = ?");
+        $stmt->bind_param("si", $data['Specialization'], $id);
         $result = $stmt->execute();
         $stmt->close();
         return $result;

@@ -11,19 +11,16 @@ try {
 
     $tableName = $_POST['table'];
     $id = $_POST['id'];
-    $data = $_POST;
-    unset($data['table']);
-    unset($data['id']);
 
     $db = (new DatabaseConnection())->connectToDB();
     $model = ModelFactory::getModelInstance($tableName, $db);
-    $result = $model->update($id, $data);
+    $result = $model->delete($id);
 
     if ($result) {
-        header("Location: /clinicus/admin/{$tableName}?success=updated");
+        header("Location: /clinicus/{$tableName}?success=deleted");
     } else {
-        header("Location: /clinicus/admin/{$tableName}?error=update_failed");
+        header("Location: /clinicus/{$tableName}?error=delete_failed");
     }
 } catch (Exception $e) {
-    header("Location: /clinicus/admin/{$tableName}?error=" . urlencode($e->getMessage()));
+    header("Location: /clinicus/{$tableName}?error=" . urlencode($e->getMessage()));
 }

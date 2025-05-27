@@ -121,7 +121,7 @@ try {
                     </div>
                     <p class="card-text">Manage system users, including administrators, staff, doctors, and patients.
                     </p>
-                    <a href="/clinicus/admin/users" class="btn btn-primary">Manage Users</a>
+                    <a href="./admin/users" class="btn btn-primary">Manage Users</a>
                 </div>
             </div>
         </div>
@@ -135,7 +135,7 @@ try {
                         <h5 class="card-title mb-0">User Types</h5>
                     </div>
                     <p class="card-text">Manage different types of users and their roles in the system.</p>
-                    <a href="/clinicus/admin/usertype" class="btn btn-primary">Manage User Types</a>
+                    <a href="./admin/usertype" class="btn btn-primary">Manage User Types</a>
                 </div>
             </div>
         </div>
@@ -149,7 +149,7 @@ try {
                         <h5 class="card-title mb-0">Doctors</h5>
                     </div>
                     <p class="card-text">Add, edit, or remove doctors and their specializations.</p>
-                    <a href="/clinicus/admin/doctors" class="btn btn-primary">Manage Doctors</a>
+                    <a href="./admin/doctors" class="btn btn-primary">Manage Doctors</a>
                 </div>
             </div>
         </div>
@@ -167,7 +167,7 @@ try {
                         <h5 class="card-title mb-0">Patients</h5>
                     </div>
                     <p class="card-text">Manage patient records and their personal information.</p>
-                    <a href="/clinicus/admin/patients" class="btn btn-primary">Manage Patients</a>
+                    <a href="./admin/patients" class="btn btn-primary">Manage Patients</a>
                 </div>
             </div>
         </div>
@@ -181,7 +181,7 @@ try {
                         <h5 class="card-title mb-0">Appointments</h5>
                     </div>
                     <p class="card-text">Schedule and manage patient appointments with doctors.</p>
-                    <a href="/clinicus/admin/appointments" class="btn btn-primary">Manage
+                    <a href="./admin/appointments" class="btn btn-primary">Manage
                         Appointments</a>
                 </div>
             </div>
@@ -196,7 +196,7 @@ try {
                         <h5 class="card-title mb-0">Medical History</h5>
                     </div>
                     <p class="card-text">View and update the patients' medical history records.</p>
-                    <a href="/clinicus/admin/medical_history" class="btn btn-primary">Manage Medical
+                    <a href="./admin/medical_history" class="btn btn-primary">Manage Medical
                         History</a>
                 </div>
             </div>
@@ -215,7 +215,7 @@ try {
                         <h5 class="card-title mb-0">Medications</h5>
                     </div>
                     <p class="card-text">Add, edit, or remove medications.</p>
-                    <a href="/clinicus/admin/medications" class="btn btn-primary">Manage Medications</a>
+                    <a href="./admin/medications" class="btn btn-primary">Manage Medications</a>
                 </div>
             </div>
         </div>
@@ -229,7 +229,7 @@ try {
                         <h5 class="card-title mb-0">Prescriptions</h5>
                     </div>
                     <p class="card-text">Manage prescriptions issued by doctors to patients.</p>
-                    <a href="/clinicus/admin/prescriptions" class="btn btn-primary">Manage
+                    <a href="./admin/prescriptions" class="btn btn-primary">Manage
                         Prescriptions</a>
                 </div>
             </div>
@@ -244,7 +244,7 @@ try {
                         <h5 class="card-title mb-0">Staff</h5>
                     </div>
                     <p class="card-text">Manage clinic staff members and their roles.</p>
-                    <a href="/clinicus/admin/staff" class="btn btn-primary">Manage Staff</a>
+                    <a href="./admin/staff" class="btn btn-primary">Manage Staff</a>
                 </div>
             </div>
         </div>

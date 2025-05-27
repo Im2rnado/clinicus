@@ -43,12 +43,12 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="/clinicus/admin">Clinicus Admin</a>
+            <a class="navbar-brand" href="./admin">Clinicus Admin</a>
             <div class="d-flex">
-                <a href="/clinicus/" class="btn btn-outline-light me-2">
+                <a href="./" class="btn btn-outline-light me-2">
                     <i class="bi bi-house"></i> Back to Home
                 </a>
-                <a href="/clinicus/logout.php" class="btn btn-outline-light">
+                <a href="./logout.php" class="btn btn-outline-light">
                     <i class="bi bi-box-arrow-right"></i> Logout
                 </a>
             </div>

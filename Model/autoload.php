@@ -1,23 +1,24 @@
 <?php
+
 spl_autoload_register(function ($class) {
-    // Convert namespace to full file path
-    $prefix = 'Model\\';
-    $base_dir = __DIR__ . '/';
+    // Convert namespace separators to directory separators
+    $class = str_replace('\\', DIRECTORY_SEPARATOR, $class);
 
-    // Check if the class uses the namespace prefix
-    $len = strlen($prefix);
-    if (strncmp($prefix, $class, $len) !== 0) {
-        return;
-    }
+    // Define the base directories to look for classes
+    $directories = [
+        'Controllers/',
+        'Model/',
+        'Model/entities/',
+        'Model/abstract/',
+        'Model/interfaces/'
+    ];
 
-    // Get the relative class name
-    $relative_class = substr($class, $len);
-
-    // Replace namespace separators with directory separators
-    $file = $base_dir . str_replace('\\', '/', $relative_class) . '.php';
-
-    // If the file exists, require it
-    if (file_exists($file)) {
-        require $file;
+    // Look for the class in each directory
+    foreach ($directories as $directory) {
+        $file = $directory . $class . '.php';
+        if (file_exists($file)) {
+            require_once $file;
+            return;
+        }
     }
 });

@@ -55,28 +55,28 @@ if (!empty($records)) {
                         <thead>
                             <tr>
                                 <?php foreach ($columns as $column): ?>
-                                    <th><?php echo ucfirst($column); ?></th>
+                                        <th><?php echo ucfirst($column); ?></th>
                                 <?php endforeach; ?>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php foreach ($records as $record): ?>
-                                <tr>
-                                    <?php foreach ($columns as $column): ?>
-                                        <td><?php echo $record[$column]; ?></td>
-                                    <?php endforeach; ?>
-                                    <td>
-                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
-                                            data-target="#editModal" data-id="<?php echo $record[$primaryKey]; ?>">
-                                            Edit
-                                        </button>
-                                        <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
-                                            data-target="#deleteModal" data-id="<?php echo $record[$primaryKey]; ?>">
-                                            Delete
-                                        </button>
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <?php foreach ($columns as $column): ?>
+                                                <td><?php echo $record[$column]; ?></td>
+                                        <?php endforeach; ?>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-info" data-toggle="modal"
+                                                data-target="#editModal" data-id="<?php echo $record[$primaryKey]; ?>">
+                                                Edit
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-danger" data-toggle="modal"
+                                                data-target="#deleteModal" data-id="<?php echo $record[$primaryKey]; ?>">
+                                                Delete
+                                            </button>
+                                        </td>
+                                    </tr>
                             <?php endforeach; ?>
                         </tbody>
                     </table>
@@ -97,17 +97,17 @@ if (!empty($records)) {
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="/clinicus/admin/actions/create.php" method="POST">
+            <form action="./actions/create.php" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="table" value="<?php echo $tableName; ?>">
                     <?php foreach ($columns as $column): ?>
-                        <?php if ($column !== 'id'): ?>
-                            <div class="form-group">
-                                <label for="<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
-                                <input type="text" class="form-control" id="<?php echo $column; ?>"
-                                    name="<?php echo $column; ?>" required>
-                            </div>
-                        <?php endif; ?>
+                            <?php if ($column !== 'id'): ?>
+                                    <div class="form-group">
+                                        <label for="<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
+                                        <input type="text" class="form-control" id="<?php echo $column; ?>"
+                                            name="<?php echo $column; ?>" required>
+                                    </div>
+                            <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <div class="modal-footer">
@@ -129,18 +129,18 @@ if (!empty($records)) {
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="/clinicus/admin/actions/update.php" method="POST">
+            <form action="./actions/update.php" method="POST">
                 <div class="modal-body">
                     <input type="hidden" name="table" value="<?php echo $tableName; ?>">
                     <input type="hidden" name="id" id="edit-id">
                     <?php foreach ($columns as $column): ?>
-                        <?php if ($column !== 'id'): ?>
-                            <div class="form-group">
-                                <label for="edit-<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
-                                <input type="text" class="form-control" id="edit-<?php echo $column; ?>"
-                                    name="<?php echo $column; ?>" required>
-                            </div>
-                        <?php endif; ?>
+                            <?php if ($column !== 'id'): ?>
+                                    <div class="form-group">
+                                        <label for="edit-<?php echo $column; ?>"><?php echo ucfirst($column); ?></label>
+                                        <input type="text" class="form-control" id="edit-<?php echo $column; ?>"
+                                            name="<?php echo $column; ?>" required>
+                                    </div>
+                            <?php endif; ?>
                     <?php endforeach; ?>
                 </div>
                 <div class="modal-footer">
@@ -184,9 +184,9 @@ if (!empty($records)) {
                     var record = data.record;
                     $('#edit-id').val(record.id);
                     <?php foreach ($columns as $column): ?>
-                        <?php if ($column !== 'id'): ?>
-                            $('#edit-<?php echo $column; ?>').val(record.<?php echo $column; ?>);
-                        <?php endif; ?>
+                            <?php if ($column !== 'id'): ?>
+                                    $('#edit-<?php echo $column; ?>').val(record.<?php echo $column; ?>);
+                            <?php endif; ?>
                     <?php endforeach; ?>
                 }
             });

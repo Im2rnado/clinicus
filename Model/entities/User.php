@@ -3,6 +3,8 @@
 
 namespace Model\entities;
 
+include_once __DIR__ . "/../abstract/AbstractUser.php";
+include_once __DIR__ . "/../interfaces/ILogUser.php";
 use Model\abstract\AbstractUser;
 use Model\interfaces\ILogUser;
 
@@ -12,6 +14,8 @@ class User extends AbstractUser implements ILogUser
     public $FirstName;
     public $LastName;
     public $username;
+    public $email;
+    public $phone;
     public $password;
     public $dob;
     public $addressID;
@@ -49,8 +53,19 @@ class User extends AbstractUser implements ILogUser
     // Implement abstract CRUD methods
     public function create($data)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Users (FirstName, LastName, username, password, dob, addressID, roleID) VALUES (?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssi", $data['FirstName'], $data['LastName'], $data['username'], $data['password'], $data['dob'], $data['addressID'], $data['roleID']);
+        $stmt = $this->conn->prepare("INSERT INTO Users (FirstName, LastName, username, email, phone, password, dob, addressID, roleID) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param(
+            "ssssssssi",
+            $data['FirstName'],
+            $data['LastName'],
+            $data['username'],
+            $data['email'],
+            $data['phone'],
+            $data['password'],
+            $data['dob'],
+            $data['addressID'],
+            $data['roleID']
+        );
         $result = $stmt->execute();
         $stmt->close();
         return $result;
@@ -82,8 +97,20 @@ class User extends AbstractUser implements ILogUser
 
     public function update($id, $data)
     {
-        $stmt = $this->conn->prepare("UPDATE Users SET FirstName = ?, LastName = ?, username = ?, password = ?, dob = ?, addressID = ?, roleID = ? WHERE userID = ?");
-        $stmt->bind_param("ssssssii", $data['FirstName'], $data['LastName'], $data['username'], $data['password'], $data['dob'], $data['addressID'], $data['roleID'], $id);
+        $stmt = $this->conn->prepare("UPDATE Users SET FirstName = ?, LastName = ?, username = ?, email = ?, phone = ?, password = ?, dob = ?, addressID = ?, roleID = ? WHERE userID = ?");
+        $stmt->bind_param(
+            "ssssssssii",
+            $data['FirstName'],
+            $data['LastName'],
+            $data['username'],
+            $data['email'],
+            $data['phone'],
+            $data['password'],
+            $data['dob'],
+            $data['addressID'],
+            $data['roleID'],
+            $id
+        );
         $result = $stmt->execute();
         $stmt->close();
         return $result;
@@ -180,5 +207,27 @@ class User extends AbstractUser implements ILogUser
     {
         // TODO: Implement password reset logic
         return false;
+    }
+
+    public function getByUsername($username)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Users WHERE username = ?");
+        $stmt->bind_param("s", $username);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        return $user;
+    }
+
+    public function getByEmail($email)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Users WHERE email = ?");
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        return $user;
     }
 }

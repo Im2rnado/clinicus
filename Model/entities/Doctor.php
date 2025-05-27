@@ -11,7 +11,7 @@ class Doctor extends AbstractUser
     public $ID;
     public $yearsOfExperince;
     public $rating;
-    public $docotrType;
+    public $doctorType;
     public $createdAt;
     public $updatedAt;
 
@@ -56,8 +56,8 @@ class Doctor extends AbstractUser
             $userCreated = true;
         }
         if ($userCreated) {
-            $stmt = $this->conn->prepare("INSERT INTO Doctors (userID, yearsOfExperince, rating, docotrType) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiii", $userId, $data['yearsOfExperince'], $data['rating'], $data['docotrType']);
+            $stmt = $this->conn->prepare("INSERT INTO Doctors (userID, yearsOfExperince, rating, doctorType) VALUES (?, ?, ?, ?)");
+            $stmt->bind_param("iiii", $userId, $data['yearsOfExperince'], $data['rating'], $data['doctorType']);
             $result = $stmt->execute();
             $stmt->close();
             return $result;
@@ -91,8 +91,8 @@ class Doctor extends AbstractUser
 
     public function update($id, $data)
     {
-        $stmt = $this->conn->prepare("UPDATE Doctors SET yearsOfExperince = ?, rating = ?, docotrType = ? WHERE ID = ?");
-        $stmt->bind_param("iiii", $data['yearsOfExperince'], $data['rating'], $data['docotrType'], $id);
+        $stmt = $this->conn->prepare("UPDATE Doctors SET yearsOfExperince = ?, rating = ?, doctorType = ? WHERE ID = ?");
+        $stmt->bind_param("iiii", $data['yearsOfExperince'], $data['rating'], $data['doctorType'], $id);
         $result = $stmt->execute();
         $stmt->close();
         return $result;
@@ -105,6 +105,40 @@ class Doctor extends AbstractUser
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    public function getAll()
+    {
+        $query = "SELECT d.*, u.firstName, u.lastName, u.email, u.phone, u.address, u.profileImage 
+                 FROM Doctors d 
+                 JOIN Users u ON d.userID = u.ID 
+                 ORDER BY u.firstName, u.lastName";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $doctors = [];
+        while ($row = $result->fetch_assoc()) {
+            // Format the data for consistency
+            $doctors[] = [
+                'ID' => $row['ID'],
+                'userID' => $row['userID'],
+                'name' => $row['firstName'] . ' ' . $row['lastName'],
+                'email' => $row['email'],
+                'phone' => $row['phone'],
+                'address' => $row['address'],
+                'profileImage' => $row['profileImage'],
+                'yearsOfExperience' => $row['yearsOfExperince'],
+                'rating' => $row['rating'],
+                'doctorType' => $row['doctorType'],
+                'createdAt' => $row['createdAt'],
+                'updatedAt' => $row['updatedAt']
+            ];
+        }
+
+        $stmt->close();
+        return $doctors;
     }
 
     // --- Doctor class diagram methods ---

@@ -6,7 +6,6 @@ class Address
 {
     public $Id;
     public $name;
-    public $reference;
     public $createdAt;
     public $updatedAt;
     private $conn;
@@ -18,11 +17,14 @@ class Address
 
     public function create($data)
     {
-        $stmt = $this->conn->prepare("INSERT INTO Address (name, reference) VALUES (?, ?)");
-        $stmt->bind_param("si", $data['name'], $data['reference']);
+        $stmt = $this->conn->prepare("INSERT INTO Address (name) VALUES (?)");
+        $stmt->bind_param("s", $data['name']);
         $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+
+        if ($result) {
+            return $this->conn->insert_id; // Return the actual ID of the new address
+        }
+        return false;
     }
 
     public function read($id = null)
@@ -47,8 +49,8 @@ class Address
 
     public function update($id, $data)
     {
-        $stmt = $this->conn->prepare("UPDATE Address SET name = ?, reference = ? WHERE Id = ?");
-        $stmt->bind_param("sii", $data['name'], $data['reference'], $id);
+        $stmt = $this->conn->prepare("UPDATE Address SET name = ? WHERE Id = ?");
+        $stmt->bind_param("si", $data['name'], $id);
         $result = $stmt->execute();
         $stmt->close();
         return $result;
@@ -61,5 +63,14 @@ class Address
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    public function getByAddress($address)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Address WHERE name = ?");
+        $stmt->bind_param("s", $address);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc();
     }
 }

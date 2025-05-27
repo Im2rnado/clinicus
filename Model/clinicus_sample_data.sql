@@ -26,7 +26,6 @@ CREATE TABLE User_Types (
 CREATE TABLE Address (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    reference INT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -85,7 +84,7 @@ CREATE TABLE Patients (
 -- 9. Doctor_Types
 CREATE TABLE Doctor_Types (
     ID INT AUTO_INCREMENT PRIMARY KEY,
-    Specilization VARCHAR(255) NOT NULL,
+    Specialization VARCHAR(255) NOT NULL,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
@@ -96,11 +95,11 @@ CREATE TABLE Doctors (
     userID INT NOT NULL,
     yearsOfExperince INT DEFAULT 0,
     rating INT DEFAULT 0,
-    docotrType INT,
+    doctorType INT,
     createdAt DATETIME DEFAULT CURRENT_TIMESTAMP,
     updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (userID) REFERENCES Users(userID),
-    FOREIGN KEY (docotrType) REFERENCES Doctor_Types(ID)
+    FOREIGN KEY (doctorType) REFERENCES Doctor_Types(ID)
 );
 
 -- 11. Staff
@@ -422,15 +421,15 @@ INSERT INTO User_Types (Type) VALUES
 ('Admin'), ('Doctor'), ('Patient'), ('Nurse'), ('Receptionist'), ('Pharmacist'), ('Manager');
 
 -- Address
-INSERT INTO Address (name, reference) VALUES 
-('15 Tahrir Square, Downtown Cairo', 1),
-('28 Zamalek Street, Zamalek, Cairo', 2),
-('45 Nasr City, New Cairo', 3),
-('12 Alexandria Road, Giza', 4),
-('33 Heliopolis, Cairo', 5),
-('67 Maadi, Cairo', 6),
-('89 Dokki, Giza', 7),
-('23 6th October City', 8);
+INSERT INTO Address (name) VALUES 
+('15 Tahrir Square, Downtown Cairo'),
+('28 Zamalek Street, Zamalek, Cairo'),
+('45 Nasr City, New Cairo'),
+('12 Alexandria Road, Giza'),
+('33 Heliopolis, Cairo'),
+('67 Maadi, Cairo'),
+('89 Dokki, Giza'),
+('23 6th October City');
 
 -- Department
 INSERT INTO Department (name) VALUES 
@@ -460,11 +459,11 @@ INSERT INTO Patients (userID, bloodType) VALUES
 (2, 1), (7, 3), (8, 5);
 
 -- Doctor_Types
-INSERT INTO Doctor_Types (Specilization) VALUES 
+INSERT INTO Doctor_Types (Specialization) VALUES 
 ('Cardiologist'), ('Pediatrician'), ('Orthopedic Surgeon'), ('Neurologist'), ('General Practitioner'), ('Emergency Medicine'), ('Radiologist');
 
 -- Doctors (referencing doctor users)
-INSERT INTO Doctors (userID, yearsOfExperince, rating, docotrType) VALUES 
+INSERT INTO Doctors (userID, yearsOfExperince, rating, doctorType) VALUES 
 (1, 15, 95, 1),
 (3, 20, 98, 3),
 (5, 12, 92, 5);

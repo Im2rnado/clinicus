@@ -37,7 +37,7 @@ switch ($path) {
                 $controller->manageTable($tableName);
             } else {
                 // Handle invalid table name
-                header("Location: /clinicus/admin?error=invalid_table");
+                header("Location: ?error=invalid_table");
                 exit;
             }
         } else {

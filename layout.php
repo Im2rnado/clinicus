@@ -11,23 +11,23 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container">
-            <a class="navbar-brand" href="/clinicus/">Clinicus</a>
+            <a class="navbar-brand" href="./">Clinicus</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/clinicus/">Home</a>
+                        <a class="nav-link" href="./">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/clinicus/#services">Services</a>
+                        <a class="nav-link" href="./#services">Services</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/clinicus/#doctors">Doctors</a>
+                        <a class="nav-link" href="./#doctors">Doctors</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/clinicus/admin/">Admin Panel</a>
+                        <a class="nav-link" href="./admin/">Admin Panel</a>
                     </li>
                 </ul>
             </div>

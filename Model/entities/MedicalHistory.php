@@ -2,6 +2,8 @@
 // Model/entities/MedicalHistory.php
 namespace Model\entities;
 
+include_once __DIR__ . "/../interfaces/IHealthRecord.php";
+
 use AbstractMedicalHistory;
 use Model\interfaces\IHealthRecord;
 
@@ -15,7 +17,7 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
     public $createdBy;
     public $createdAt;
     public $updatedAt;
-    private $conn;
+    protected $conn;
 
     public function __construct($db)
     {
@@ -104,5 +106,91 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
             $histories[] = $row;
         }
         return $histories;
+    }
+
+    public function getRecentHistory($patientId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                mh.ID,
+                mh.description,
+                mh.date,
+                CONCAT(d.FirstName, ' ', d.LastName) as doctorName
+            FROM Medical_History mh
+            JOIN Doctors doc ON mh.DoctorID = doc.ID
+            JOIN Users d ON doc.userID = d.userID
+            WHERE mh.userID = ?
+            ORDER BY mh.date DESC
+            LIMIT 5
+        ");
+        $stmt->bind_param("i", $patientId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getAllHistory($patientId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                mh.ID,
+                mh.diagnosis,
+                mh.treatment,
+                mh.notes,
+                mh.date,
+                CONCAT(d.FirstName, ' ', d.LastName) as doctorName
+            FROM Medical_History mh
+            JOIN Doctors doc ON mh.DoctorID = doc.ID
+            JOIN Users d ON doc.userID = d.userID
+            WHERE mh.userID = ?
+            ORDER BY mh.date DESC
+        ");
+        $stmt->bind_param("i", $patientId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getPrescriptions($patientId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                p.ID,
+                p.medication,
+                p.dosage,
+                p.frequency,
+                p.duration,
+                p.notes,
+                p.date,
+                p.status,
+                CONCAT(d.FirstName, ' ', d.LastName) as doctorName
+            FROM Prescriptions p
+            JOIN Doctors doc ON p.DoctorID = doc.ID
+            JOIN Users d ON doc.userID = d.userID
+            WHERE p.userID = ?
+            ORDER BY p.date DESC
+        ");
+        $stmt->bind_param("i", $patientId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function createPrescription($data)
+    {
+        $stmt = $this->conn->prepare("
+            INSERT INTO Prescriptions (userID, DoctorID, medication, dosage, frequency, duration, notes, date, status)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        ");
+        $stmt->bind_param(
+            "iisssssss",
+            $data['userID'],
+            $data['doctorID'],
+            $data['medication'],
+            $data['dosage'],
+            $data['frequency'],
+            $data['duration'],
+            $data['notes'],
+            $data['date'],
+            $data['status']
+        );
+        return $stmt->execute();
     }
 }
