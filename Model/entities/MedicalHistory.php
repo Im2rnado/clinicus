@@ -114,13 +114,14 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
             SELECT 
                 mh.ID,
                 mh.description,
-                mh.date,
+                a.appointmentDate as date,
                 CONCAT(d.FirstName, ' ', d.LastName) as doctorName
             FROM Medical_History mh
-            JOIN Doctors doc ON mh.DoctorID = doc.ID
+            JOIN Appointment a ON mh.appointmentID = a.ID
+            JOIN Doctors doc ON a.DoctorID = doc.ID
             JOIN Users d ON doc.userID = d.userID
-            WHERE mh.userID = ?
-            ORDER BY mh.date DESC
+            WHERE mh.patientID = ?
+            ORDER BY a.appointmentDate DESC
             LIMIT 5
         ");
         $stmt->bind_param("i", $patientId);
@@ -133,16 +134,15 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
         $stmt = $this->conn->prepare("
             SELECT 
                 mh.ID,
-                mh.diagnosis,
-                mh.treatment,
-                mh.notes,
-                mh.date,
+                mh.description,
+                a.appointmentDate as date,
                 CONCAT(d.FirstName, ' ', d.LastName) as doctorName
             FROM Medical_History mh
-            JOIN Doctors doc ON mh.DoctorID = doc.ID
+            JOIN Appointment a ON mh.appointmentID = a.ID
+            JOIN Doctors doc ON a.DoctorID = doc.ID
             JOIN Users d ON doc.userID = d.userID
-            WHERE mh.userID = ?
-            ORDER BY mh.date DESC
+            WHERE mh.patientID = ?
+            ORDER BY a.appointmentDate DESC
         ");
         $stmt->bind_param("i", $patientId);
         $stmt->execute();

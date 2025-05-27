@@ -178,38 +178,38 @@
                     <ul class="navbar-nav ms-auto">
                         <?php if (isset($_SESSION['user_id'])): ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="./patient/dashboard">
+                                <a class="nav-link" href="/clinicus/patient/dashboard">
                                     <i class="bi bi-speedometer2 me-1"></i>
                                     Dashboard
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="./patient/appointments">
+                                <a class="nav-link" href="/clinicus/patient/appointments">
                                     <i class="bi bi-calendar-check me-1"></i>
                                     Appointments
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="./patient/profile">
+                                <a class="nav-link" href="/clinicus/patient/profile">
                                     <i class="bi bi-person me-1"></i>
                                     Profile
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="./auth/logout">
+                                <a class="nav-link" href="/clinicus/auth/logout">
                                     <i class="bi bi-box-arrow-right me-1"></i>
                                     Logout
                                 </a>
                             </li>
                         <?php else: ?>
                             <li class="nav-item">
-                                <a class="nav-link" href="./auth/login">
+                                <a class="nav-link" href="/clinicus/auth/login">
                                     <i class="bi bi-box-arrow-in-right me-1"></i>
                                     Login
                                 </a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link" href="./auth/register">
+                                <a class="nav-link" href="/clinicus/auth/register">
                                     <i class="bi bi-person-plus me-1"></i>
                                     Register
                                 </a>

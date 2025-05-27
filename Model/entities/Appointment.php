@@ -573,12 +573,12 @@ class Appointment implements iAppointmentActions
                 a.appointmentDate,
                 a.status,
                 CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
-                s.name as specialization,
+                s.Specialization as specialization,
                 ad.totalPrice
             FROM Appointment a
             JOIN Doctors doc ON a.DoctorID = doc.ID
             JOIN Users d ON doc.userID = d.userID
-            JOIN Specialization s ON doc.specializationID = s.ID
+            JOIN doctor_types s ON doc.doctorType = s.ID
             LEFT JOIN Appointment_Details ad ON a.ID = ad.appointmentID
             WHERE a.userID = ?
             ORDER BY a.appointmentDate DESC
