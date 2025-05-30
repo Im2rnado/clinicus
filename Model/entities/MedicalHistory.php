@@ -148,49 +148,4 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
-
-    public function getPrescriptions($patientId)
-    {
-        $stmt = $this->conn->prepare("
-            SELECT 
-                p.ID,
-                p.medication,
-                p.dosage,
-                p.frequency,
-                p.duration,
-                p.notes,
-                p.date,
-                p.status,
-                CONCAT(d.FirstName, ' ', d.LastName) as doctorName
-            FROM Prescriptions p
-            JOIN Doctors doc ON p.DoctorID = doc.ID
-            JOIN Users d ON doc.userID = d.userID
-            WHERE p.userID = ?
-            ORDER BY p.date DESC
-        ");
-        $stmt->bind_param("i", $patientId);
-        $stmt->execute();
-        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
-    }
-
-    public function createPrescription($data)
-    {
-        $stmt = $this->conn->prepare("
-            INSERT INTO Prescriptions (userID, DoctorID, medication, dosage, frequency, duration, notes, date, status)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ");
-        $stmt->bind_param(
-            "iisssssss",
-            $data['userID'],
-            $data['doctorID'],
-            $data['medication'],
-            $data['dosage'],
-            $data['frequency'],
-            $data['duration'],
-            $data['notes'],
-            $data['date'],
-            $data['status']
-        );
-        return $stmt->execute();
-    }
 }

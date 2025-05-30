@@ -12,7 +12,6 @@ try {
     $doctorModel = ModelFactory::getModelInstance('doctors', $db);
     $patientModel = ModelFactory::getModelInstance('patients', $db);
     $appointmentModel = ModelFactory::getModelInstance('appointments', $db);
-    $prescriptionModel = ModelFactory::getModelInstance('prescriptions', $db);
     $medicationModel = ModelFactory::getModelInstance('medications', $db);
     $staffModel = ModelFactory::getModelInstance('staff', $db);
     $medicalHistoryModel = ModelFactory::getModelInstance('medical_history', $db);
@@ -23,7 +22,6 @@ try {
         'totalDoctors' => count($doctorModel->readAll()),
         'totalPatients' => count($patientModel->readAll()),
         'totalAppointments' => count($appointmentModel->readAll()),
-        'totalPrescriptions' => count($prescriptionModel->readAll()),
         'totalMedications' => count($medicationModel->readAll()),
         'totalStaff' => count($staffModel->readAll()),
         'totalMedicalHistory' => count($medicalHistoryModel->readAll()),
@@ -35,7 +33,6 @@ try {
         'totalDoctors' => '0',
         'totalPatients' => '0',
         'totalAppointments' => '0',
-        'totalPrescriptions' => '0',
         'totalMedications' => '0',
         'totalStaff' => '0',
         'totalMedicalHistory' => '0',
@@ -86,13 +83,6 @@ try {
                                 <i class="bi bi-calendar-check text-primary fs-3"></i>
                                 <h3 class="mb-1"><?php echo $stats['totalAppointments']; ?></h3>
                                 <p class="small text-muted mb-0">Appointments</p>
-                            </div>
-                        </div>
-                        <div class="col-md-2 col-sm-4 mb-3">
-                            <div class="bg-white p-3 rounded shadow-sm">
-                                <i class="bi bi-file-earmark-medical text-primary fs-3"></i>
-                                <h3 class="mb-1"><?php echo $stats['totalPrescriptions']; ?></h3>
-                                <p class="small text-muted mb-0">Prescriptions</p>
                             </div>
                         </div>
                         <div class="col-md-2 col-sm-4 mb-3">
@@ -216,21 +206,6 @@ try {
                     </div>
                     <p class="card-text">Add, edit, or remove medications.</p>
                     <a href="./admin/medications" class="btn btn-primary">Manage Medications</a>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card mb-4 shadow-sm">
-                <div class="card-body">
-                    <div class="d-flex align-items-center mb-3">
-                        <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
-                            <i class="bi bi-file-earmark-medical text-primary fs-4"></i>
-                        </div>
-                        <h5 class="card-title mb-0">Prescriptions</h5>
-                    </div>
-                    <p class="card-text">Manage prescriptions issued by doctors to patients.</p>
-                    <a href="./admin/prescriptions" class="btn btn-primary">Manage
-                        Prescriptions</a>
                 </div>
             </div>
         </div>

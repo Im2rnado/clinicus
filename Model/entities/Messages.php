@@ -40,6 +40,21 @@ class Messages implements IMessageSender
         return $message;
     }
 
+    public function getMessagesByUserId($userId)
+    {
+        $stmt = $this->conn->prepare("SELECT * FROM Messages WHERE typeID = ?");
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function markAsRead($messageIds)
+    {
+        $stmt = $this->conn->prepare("UPDATE Messages SET isRead = 1 WHERE ID IN (" . implode(',', $messageIds) . ")");
+        return $stmt->execute();
+    }
+
     // Basic CRUD logic for Messages
     public function create($data)
     {

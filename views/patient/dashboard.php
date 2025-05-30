@@ -79,7 +79,7 @@ $title = "Patient Dashboard - Clinicus";
                     </div>
                 <?php endif; ?>
                 <div class="text-end mt-3">
-                    <a href="/clinicus/patient/medical-history" class="btn btn-primary">View Full History</a>
+                    <a href="/clinicus/patient/medicalHistory" class="btn btn-primary">View Full History</a>
                 </div>
             </div>
         </div>
@@ -91,22 +91,17 @@ $title = "Patient Dashboard - Clinicus";
             <div class="box">
                 <h3 class="mb-4">Quick Actions</h3>
                 <div class="row">
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <a href="/clinicus/appointments/create" class="btn btn-primary w-100">
                             <i class="fas fa-calendar-plus"></i> Book Appointment
                         </a>
                     </div>
-                    <div class="col-md-3 mb-3">
-                        <a href="/clinicus/patient/prescriptions" class="btn btn-info w-100">
-                            <i class="fas fa-prescription"></i> View Prescriptions
-                        </a>
-                    </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <a href="/clinicus/patient/profile" class="btn btn-secondary w-100">
                             <i class="fas fa-user-edit"></i> Update Profile
                         </a>
                     </div>
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-4 mb-3">
                         <a href="/clinicus/patient/messages" class="btn btn-success w-100">
                             <i class="fas fa-envelope"></i> Messages
                         </a>

@@ -109,36 +109,16 @@ class Doctor extends AbstractUser
 
     public function getAll()
     {
-        $query = "SELECT d.*, u.firstName, u.lastName, u.email, u.phone, u.address, u.profileImage 
+        $query = "SELECT d.*, u.FirstName, u.LastName, u.email, u.phone, a.name as address 
                  FROM Doctors d 
-                 JOIN Users u ON d.userID = u.ID 
-                 ORDER BY u.firstName, u.lastName";
+                 JOIN Users u ON d.userID = u.userID 
+                 JOIN Address a ON u.addressID = a.ID 
+                 ORDER BY u.FirstName, u.LastName";
 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $result = $stmt->get_result();
-
-        $doctors = [];
-        while ($row = $result->fetch_assoc()) {
-            // Format the data for consistency
-            $doctors[] = [
-                'ID' => $row['ID'],
-                'userID' => $row['userID'],
-                'name' => $row['firstName'] . ' ' . $row['lastName'],
-                'email' => $row['email'],
-                'phone' => $row['phone'],
-                'address' => $row['address'],
-                'profileImage' => $row['profileImage'],
-                'yearsOfExperience' => $row['yearsOfExperince'],
-                'rating' => $row['rating'],
-                'doctorType' => $row['doctorType'],
-                'createdAt' => $row['createdAt'],
-                'updatedAt' => $row['updatedAt']
-            ];
-        }
-
-        $stmt->close();
-        return $doctors;
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     // --- Doctor class diagram methods ---
@@ -185,5 +165,32 @@ class Doctor extends AbstractUser
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    public function getAllSpecializations()
+    {
+        $query = "SELECT ID, Specialization FROM doctor_types ORDER BY Specialization";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getDoctorsBySpecialization($specializationId)
+    {
+        $query = "SELECT d.*, u.FirstName, u.LastName, u.email, u.phone, a.name as address,
+                        dt.Specialization as specialization
+                 FROM Doctors d 
+                 JOIN Users u ON d.userID = u.userID 
+                 JOIN Address a ON u.addressID = a.ID 
+                 JOIN doctor_types dt ON d.doctorType = dt.ID
+                 WHERE d.doctorType = ?
+                 ORDER BY d.rating DESC, d.yearsOfExperince DESC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $specializationId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 }

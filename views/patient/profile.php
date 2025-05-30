@@ -1,3 +1,4 @@
+<?php
 $title = "My Profile - Clinicus";
 ?>
 

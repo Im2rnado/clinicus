@@ -26,10 +26,23 @@
             --shadow-md: 0 15px 35px rgba(0, 0, 0, 0.1);
         }
 
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-color);
             background-color: var(--light-bg);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            flex: 1 0 auto;
         }
 
         .navbar {
@@ -92,7 +105,8 @@
             background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
             color: var(--white);
             padding: 2rem 0;
-            margin-top: 3rem;
+            margin-top: auto;
+            flex-shrink: 0;
         }
 
         .alert {

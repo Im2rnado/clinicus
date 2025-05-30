@@ -19,7 +19,6 @@ $validTables = [
     'appointments',
     'medical_history',
     'medications',
-    'prescriptions',
     'staff',
     'audit_logs'
 ];

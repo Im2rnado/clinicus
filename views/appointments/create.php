@@ -1,130 +1,144 @@
 <?php
-$title = 'Book Appointment';
+$title = "Book Appointment - Clinicus";
 ?>
 
 <div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h4 class="mb-0">Book New Appointment</h4>
-                </div>
-                <div class="card-body">
-                    <?php if (isset($errors['system'])): ?>
-                            <div class="alert alert-danger">
-                                <?php echo $errors['system']; ?>
-                            </div>
-                    <?php endif; ?>
-
-                    <form method="POST" action="./create" id="appointmentForm">
-                        <div class="mb-3">
-                            <label for="doctor_id" class="form-label" data-translate="select_doctor">Select Doctor</label>
-                            <select class="form-select <?php echo isset($errors['doctor_id']) ? 'is-invalid' : ''; ?>" 
-                                    id="doctor_id" name="doctor_id" required>
-                                <option value="">Choose a doctor...</option>
-                                <?php foreach ($doctors as $doctor): ?>
-                                        <option value="<?php echo $doctor['ID']; ?>" 
-                                                <?php echo (isset($doctor_id) && $doctor_id == $doctor['ID']) ? 'selected' : ''; ?>>
-                                            Dr. <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
-                                        </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <?php if (isset($errors['doctor_id'])): ?>
-                                    <div class="invalid-feedback">
-                                        <?php echo $errors['doctor_id']; ?>
-                                    </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="date" class="form-label" data-translate="appointment_date">Appointment Date</label>
-                                <input type="date" class="form-control <?php echo isset($errors['date']) ? 'is-invalid' : ''; ?>" 
-                                       id="date" name="date" value="<?php echo $date ?? ''; ?>" required>
-                                <?php if (isset($errors['date'])): ?>
-                                        <div class="invalid-feedback">
-                                            <?php echo $errors['date']; ?>
-                                        </div>
-                                <?php endif; ?>
-                            </div>
-
-                            <div class="col-md-6 mb-3">
-                                <label for="time" class="form-label" data-translate="appointment_time">Appointment Time</label>
-                                <input type="time" class="form-control <?php echo isset($errors['time']) ? 'is-invalid' : ''; ?>" 
-                                       id="time" name="time" value="<?php echo $time ?? ''; ?>" required>
-                                <?php if (isset($errors['time'])): ?>
-                                        <div class="invalid-feedback">
-                                            <?php echo $errors['time']; ?>
-                                        </div>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label for="reason" class="form-label" data-translate="appointment_reason">Reason for Visit</label>
-                            <textarea class="form-control <?php echo isset($errors['reason']) ? 'is-invalid' : ''; ?>" 
-                                      id="reason" name="reason" rows="3" required><?php echo $reason ?? ''; ?></textarea>
-                            <?php if (isset($errors['reason'])): ?>
-                                    <div class="invalid-feedback">
-                                        <?php echo $errors['reason']; ?>
-                                    </div>
-                            <?php endif; ?>
-                        </div>
-
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary" data-translate="book_appointment">
-                                <i class="fas fa-calendar-check"></i> Book Appointment
-                            </button>
-                            <a href="./appointments" class="btn btn-secondary" data-translate="cancel">
-                                <i class="fas fa-times"></i> Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
-            </div>
+    <div class="box">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2>Book Appointment</h2>
         </div>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php
+                echo $_SESSION['error'];
+                unset($_SESSION['error']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($step === 1): ?>
+            <!-- Step 1: Select Specialization -->
+            <form method="POST" action="/clinicus/appointments/create">
+                <div class="mb-4">
+                    <h4>Step 1: Select Specialization</h4>
+                    <p class="text-muted">Choose the type of doctor you need to see</p>
+                </div>
+
+                <div class="mb-3">
+                    <label for="specialization" class="form-label">Specialization</label>
+                    <select class="form-select" id="specialization" name="specialization" required>
+                        <option value="">Select a specialization</option>
+                        <?php foreach ($specializations as $spec): ?>
+                            <option value="<?php echo $spec['ID']; ?>">
+                                <?php echo htmlspecialchars($spec['Specialization']); ?>
+                            </option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="text-end">
+                    <button type="submit" class="btn btn-primary">
+                        Next <i class="fas fa-arrow-right ms-2"></i>
+                    </button>
+                </div>
+            </form>
+
+        <?php else: ?>
+            <!-- Step 2: Select Doctor and Book Appointment -->
+            <form method="POST" action="/clinicus/appointments/create">
+                <input type="hidden" name="specialization" value="<?php echo htmlspecialchars($specialization); ?>">
+
+                <div class="mb-4">
+                    <h4>Step 2: Select Doctor and Book Appointment</h4>
+                    <p class="text-muted">Choose a doctor and select your preferred appointment time</p>
+                </div>
+
+                <?php if (empty($doctors)): ?>
+                    <div class="alert alert-warning">
+                        No doctors available for this specialization at the moment.
+                    </div>
+                <?php else: ?>
+                    <div class="row mb-4">
+                        <?php foreach ($doctors as $doctor): ?>
+                            <div class="col-md-6 mb-3">
+                                <div class="card h-100">
+                                    <div class="card-body">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="doctor_id"
+                                                id="doctor_<?php echo $doctor['ID']; ?>" value="<?php echo $doctor['ID']; ?>"
+                                                required>
+                                            <label class="form-check-label" for="doctor_<?php echo $doctor['ID']; ?>">
+                                                <h5 class="card-title mb-1">
+                                                    Dr.
+                                                    <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
+                                                </h5>
+                                                <p class="card-text text-muted mb-2">
+                                                    <i class="fas fa-graduation-cap me-2"></i>
+                                                    <?php echo htmlspecialchars($doctor['specialization']); ?>
+                                                </p>
+                                                <p class="card-text mb-2">
+                                                    <i class="fas fa-briefcase me-2"></i>
+                                                    <?php echo $doctor['yearsOfExperince']; ?> years of experience
+                                                </p>
+                                                <p class="card-text">
+                                                    <i class="fas fa-star me-2 text-warning"></i>
+                                                    <?php echo number_format($doctor['rating'], 1); ?> rating
+                                                </p>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_date" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date"
+                                min="<?php echo date('Y-m-d'); ?>" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="appointment_time" class="form-label">Time</label>
+                            <select class="form-select" id="appointment_time" name="appointment_time" required>
+                                <option value="">Select a time</option>
+                                <?php
+                                $start = strtotime('09:00');
+                                $end = strtotime('17:00');
+                                $interval = 30 * 60; // 30 minutes
+                        
+                                for ($time = $start; $time <= $end; $time += $interval) {
+                                    $timeValue = date('H:i', $time);
+                                    $timeDisplay = date('h:i A', $time);
+                                    echo "<option value=\"$timeValue\">$timeDisplay</option>";
+                                }
+                                ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Visit</label>
+                        <textarea class="form-control" id="reason" name="reason" rows="3" required></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/clinicus/appointments/create" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i> Back
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            Book Appointment <i class="fas fa-calendar-check ms-2"></i>
+                        </button>
+                    </div>
+                <?php endif; ?>
+            </form>
+        <?php endif; ?>
     </div>
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
     // Set minimum date to today
-    const dateInput = document.getElementById('date');
-    const today = new Date().toISOString().split('T')[0];
-    dateInput.min = today;
-
-    // Handle language changes
-    const languageSwitcher = document.querySelector('.language-switcher select');
-    if (languageSwitcher) {
-        languageSwitcher.addEventListener('change', function() {
-            const language = this.value;
-            
-            // Get translations for the new language
-            fetch('/appointments/getTranslations', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ language: language })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update all elements with data-translate attribute
-                    document.querySelectorAll('[data-translate]').forEach(element => {
-                        const key = element.getAttribute('data-translate');
-                        if (data.translations[key]) {
-                            if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
-                                element.placeholder = data.translations[key];
-                            } else {
-                                element.textContent = data.translations[key];
-                            }
-                        }
-                    });
-                }
-            })
-            .catch(error => console.error('Error:', error));
-        });
-    }
-});
-</script> 
+    document.getElementById('appointment_date').min = new Date().toISOString().split('T')[0];
+</script>
