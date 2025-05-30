@@ -1,11 +1,12 @@
 <?php
 include_once __DIR__ . "/../Model/entities/Appointment.php";
 include_once __DIR__ . "/../Model/entities/Doctor.php";
-
+include_once __DIR__ . "/../Model/entities/Payment.php";
 class AppointmentsController extends Controller
 {
     private $appointmentModel;
     private $doctorModel;
+    private $paymentModel;
 
     public function __construct()
     {
@@ -13,6 +14,7 @@ class AppointmentsController extends Controller
         $this->requireAuth();
         $this->appointmentModel = new \Model\entities\Appointment(db: $this->db);
         $this->doctorModel = new \Model\entities\Doctor($this->db);
+        $this->paymentModel = new \Model\entities\Payment($this->db);
     }
 
     public function index()
@@ -67,6 +69,13 @@ class AppointmentsController extends Controller
                 if (empty($errors)) {
                     // Get doctor details for payment
                     $doctor = $this->doctorModel->read($doctorId);
+                    // Convert doctor object to array
+                    $doctor = (array) $doctor;
+
+                    // Get payment methods from database
+                    $paymentMethods = $this->paymentModel->getPaymentMethods();
+                    $cardOptions = $this->paymentModel->getPaymentOptions('Payment');
+                    $coverageOptions = $this->paymentModel->getPaymentOptions('Coverage');
 
                     $this->render('appointments/create', [
                         'step' => 3,
@@ -75,7 +84,10 @@ class AppointmentsController extends Controller
                         'appointment_date' => $appointmentDate,
                         'appointment_time' => $appointmentTime,
                         'reason' => $reason,
-                        'specialization' => $specialization
+                        'specialization' => $specialization,
+                        'paymentMethods' => $paymentMethods,
+                        'cardOptions' => $cardOptions,
+                        'coverageOptions' => $coverageOptions
                     ]);
                     return;
                 }
@@ -122,6 +134,8 @@ class AppointmentsController extends Controller
                 if (empty($errors)) {
                     // Get doctor details for payment amount
                     $doctor = $this->doctorModel->read($doctorId);
+                    // Convert doctor object to array
+                    $doctor = (array) $doctor;
                     $amount = $doctor['consultation_fee'];
 
                     // Create payment record

@@ -49,7 +49,7 @@ $title = "Book Appointment - Clinicus";
             <!-- Step 2: Select Doctor and Book Appointment -->
             <form method="POST" action="/clinicus/appointments/create">
                 <input type="hidden" name="specialization" value="<?php echo htmlspecialchars($specialization); ?>">
-                
+
                 <div class="mb-4">
                     <h4>Step 2: Select Doctor and Book Appointment</h4>
                     <p class="text-muted">Choose a doctor and select your preferred appointment time</p>
@@ -66,12 +66,13 @@ $title = "Book Appointment - Clinicus";
                                 <div class="card h-100">
                                     <div class="card-body">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="doctor_id" 
-                                                   id="doctor_<?php echo $doctor['ID']; ?>" 
-                                                   value="<?php echo $doctor['ID']; ?>" required>
+                                            <input class="form-check-input" type="radio" name="doctor_id"
+                                                id="doctor_<?php echo $doctor['ID']; ?>" value="<?php echo $doctor['ID']; ?>"
+                                                required>
                                             <label class="form-check-label" for="doctor_<?php echo $doctor['ID']; ?>">
                                                 <h5 class="card-title mb-1">
-                                                    Dr. <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
+                                                    Dr.
+                                                    <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
                                                 </h5>
                                                 <p class="card-text text-muted mb-2">
                                                     <i class="fas fa-graduation-cap me-2"></i>
@@ -96,8 +97,8 @@ $title = "Book Appointment - Clinicus";
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="appointment_date" class="form-label">Date</label>
-                            <input type="date" class="form-control" id="appointment_date" name="appointment_date" 
-                                   min="<?php echo date('Y-m-d'); ?>" required>
+                            <input type="date" class="form-control" id="appointment_date" name="appointment_date"
+                                min="<?php echo date('Y-m-d'); ?>" required>
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="appointment_time" class="form-label">Time</label>
@@ -107,7 +108,7 @@ $title = "Book Appointment - Clinicus";
                                 $start = strtotime('09:00');
                                 $end = strtotime('17:00');
                                 $interval = 30 * 60; // 30 minutes
-                                
+                        
                                 for ($time = $start; $time <= $end; $time += $interval) {
                                     $timeValue = date('H:i', $time);
                                     $timeDisplay = date('h:i A', $time);
@@ -142,7 +143,7 @@ $title = "Book Appointment - Clinicus";
                 <input type="hidden" name="appointment_time" value="<?php echo htmlspecialchars($appointment_time); ?>">
                 <input type="hidden" name="reason" value="<?php echo htmlspecialchars($reason); ?>">
                 <input type="hidden" name="specialization" value="<?php echo htmlspecialchars($specialization); ?>">
-                
+
                 <div class="mb-4">
                     <h4>Step 3: Payment</h4>
                     <p class="text-muted">Complete your payment to confirm the appointment</p>
@@ -153,51 +154,117 @@ $title = "Book Appointment - Clinicus";
                         <h5 class="card-title">Appointment Summary</h5>
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>Doctor:</strong> Dr. <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?></p>
-                                <p><strong>Specialization:</strong> <?php echo htmlspecialchars($doctor['specialization']); ?></p>
+                                <p><strong>Doctor:</strong> Dr.
+                                    <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
+                                </p>
+                                <p><strong>Specialization:</strong>
+                                    <?php echo htmlspecialchars($doctor['specialization']); ?></p>
                                 <p><strong>Date:</strong> <?php echo date('F j, Y', strtotime($appointment_date)); ?></p>
                                 <p><strong>Time:</strong> <?php echo date('h:i A', strtotime($appointment_time)); ?></p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Consultation Fee:</strong> $<?php echo number_format($doctor['consultation_fee'], 2); ?></p>
-                                <p><strong>Total Amount:</strong> $<?php echo number_format($doctor['consultation_fee'], 2); ?></p>
+                                <p><strong>Consultation Fee:</strong>
+                                    $<?php echo number_format($doctor['consultation_fee'] ?? 0, 2); ?></p>
+                                <p><strong>Total Amount:</strong>
+                                    $<?php echo number_format($doctor['consultation_fee'] ?? 0, 2); ?></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mb-4">
-                    <h5>Payment Method</h5>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="payment_method" id="credit_card" value="credit_card" checked required>
-                        <label class="form-check-label" for="credit_card">
-                            <i class="fas fa-credit-card me-2"></i> Credit Card
-                        </label>
-                    </div>
-                    <div class="form-check mb-2">
-                        <input class="form-check-input" type="radio" name="payment_method" id="debit_card" value="debit_card" required>
-                        <label class="form-check-label" for="debit_card">
-                            <i class="fas fa-credit-card me-2"></i> Debit Card
-                        </label>
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title">Payment Method</h5>
+                        <?php if (empty($paymentMethods)): ?>
+                            <div class="alert alert-warning">
+                                No payment methods available at the moment.
+                            </div>
+                        <?php else: ?>
+                            <div class="list-group">
+                                <?php foreach ($paymentMethods as $method): ?>
+                                    <label class="list-group-item">
+                                        <input class="form-check-input payment-method me-2" type="radio" name="payment_method"
+                                            id="method_<?php echo $method['ID']; ?>" value="<?php echo $method['ID']; ?>" required>
+                                        <i
+                                            class="fas fa-<?php echo strtolower(str_replace(' ', '-', $method['name'])); ?> me-2"></i>
+                                        <?php echo htmlspecialchars($method['name']); ?>
+                                    </label>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
                     </div>
                 </div>
 
-                <div class="mb-3">
-                    <label for="card_number" class="form-label">Card Number</label>
-                    <input type="text" class="form-control" id="card_number" name="card_number" required 
-                           pattern="[0-9]{16}" maxlength="16" placeholder="1234 5678 9012 3456">
+                <div id="card-details" class="card mb-4" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Card Details</h5>
+                        <div class="mb-3">
+                            <label for="card_number" class="form-label">Card Number</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="card_number" name="card_number" required
+                                    pattern="[0-9]{16}" maxlength="16" placeholder="1234 5678 9012 3456">
+                                <span class="input-group-text">
+                                    <i class="fab fa-cc-visa me-1"></i>
+                                    <i class="fab fa-cc-mastercard me-1"></i>
+                                    <i class="fab fa-cc-amex me-1"></i>
+                                    <i class="fab fa-cc-discover"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="expiry_date" class="form-label">Expiry Date</label>
+                                <input type="text" class="form-control" id="expiry_date" name="expiry_date" required
+                                    pattern="(0[1-9]|1[0-2])\/([0-9]{2})" maxlength="5" placeholder="MM/YY">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="cvv" class="form-label">CVV</label>
+                                <input type="text" class="form-control" id="cvv" name="cvv" required pattern="[0-9]{3,4}"
+                                    maxlength="4" placeholder="123">
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="expiry_date" class="form-label">Expiry Date</label>
-                        <input type="text" class="form-control" id="expiry_date" name="expiry_date" required 
-                               pattern="(0[1-9]|1[0-2])\/([0-9]{2})" maxlength="5" placeholder="MM/YY">
+                <div id="insurance-details" class="card mb-4" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Insurance Details</h5>
+                        <div class="mb-3">
+                            <label for="insurance_provider" class="form-label">Insurance Provider</label>
+                            <input type="text" class="form-control" id="insurance_provider" name="insurance_provider"
+                                placeholder="Enter your insurance provider">
+                        </div>
+                        <div class="mb-3">
+                            <label for="policy_number" class="form-label">Policy Number</label>
+                            <input type="text" class="form-control" id="policy_number" name="policy_number"
+                                placeholder="Enter your policy number">
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="cvv" class="form-label">CVV</label>
-                        <input type="text" class="form-control" id="cvv" name="cvv" required 
-                               pattern="[0-9]{3,4}" maxlength="4" placeholder="123">
+                </div>
+
+                <div id="bank-details" class="card mb-4" style="display: none;">
+                    <div class="card-body">
+                        <h5 class="card-title">Bank Details</h5>
+                        <div class="mb-3">
+                            <label for="account_number" class="form-label">Account Number</label>
+                            <input type="text" class="form-control" id="account_number" name="account_number"
+                                pattern="[0-9]{9,17}" maxlength="17" placeholder="Enter your account number">
+                        </div>
+                        <div class="mb-3">
+                            <label for="routing_number" class="form-label">Routing Number</label>
+                            <input type="text" class="form-control" id="routing_number" name="routing_number"
+                                pattern="[0-9]{9}" maxlength="9" placeholder="Enter your routing number">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="mobile-details" class="card mb-4" style="display: none;">
+                    <div class="card-body">
+                        <div class="alert alert-info mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>
+                            You will be redirected to complete your mobile payment.
+                        </div>
                     </div>
                 </div>
 
@@ -219,23 +286,90 @@ $title = "Book Appointment - Clinicus";
     document.getElementById('appointment_date').min = new Date().toISOString().split('T')[0];
 
     // Format card number input
-    document.getElementById('card_number').addEventListener('input', function(e) {
+    document.getElementById('card_number').addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         e.target.value = value;
     });
 
     // Format expiry date input
-    document.getElementById('expiry_date').addEventListener('input', function(e) {
+    document.getElementById('expiry_date').addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         if (value.length >= 2) {
-            value = value.slice(0,2) + '/' + value.slice(2);
+            value = value.slice(0, 2) + '/' + value.slice(2);
         }
         e.target.value = value;
     });
 
     // Format CVV input
-    document.getElementById('cvv').addEventListener('input', function(e) {
+    document.getElementById('cvv').addEventListener('input', function (e) {
         let value = e.target.value.replace(/\D/g, '');
         e.target.value = value;
+    });
+
+    // Handle payment method selection
+    document.querySelectorAll('.payment-method').forEach(radio => {
+        radio.addEventListener('change', function () {
+            // Hide all payment detail sections
+            document.getElementById('card-details').style.display = 'none';
+            document.getElementById('insurance-details').style.display = 'none';
+            document.getElementById('bank-details').style.display = 'none';
+            document.getElementById('mobile-details').style.display = 'none';
+
+            // Show relevant section based on selection
+            const methodName = this.nextElementSibling.textContent.trim().toLowerCase();
+            if (methodName.includes('credit') || methodName.includes('debit')) {
+                document.getElementById('card-details').style.display = 'block';
+            } else if (methodName.includes('insurance')) {
+                document.getElementById('insurance-details').style.display = 'block';
+            } else if (methodName.includes('bank')) {
+                document.getElementById('bank-details').style.display = 'block';
+            } else if (methodName.includes('mobile')) {
+                document.getElementById('mobile-details').style.display = 'block';
+            }
+        });
+    });
+
+    // Validate form before submission
+    document.getElementById('payment-form').addEventListener('submit', function (e) {
+        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+        if (!selectedMethod) {
+            e.preventDefault();
+            alert('Please select a payment method');
+            return;
+        }
+
+        const methodName = selectedMethod.nextElementSibling.textContent.trim().toLowerCase();
+        let isValid = true;
+
+        if (methodName.includes('credit') || methodName.includes('debit')) {
+            const cardNumber = document.getElementById('card_number').value;
+            const expiryDate = document.getElementById('expiry_date').value;
+            const cvv = document.getElementById('cvv').value;
+
+            if (!cardNumber || !expiryDate || !cvv) {
+                isValid = false;
+                alert('Please fill in all card details');
+            }
+        } else if (methodName.includes('insurance')) {
+            const provider = document.getElementById('insurance_provider').value;
+            const policyNumber = document.getElementById('policy_number').value;
+
+            if (!provider || !policyNumber) {
+                isValid = false;
+                alert('Please fill in all insurance details');
+            }
+        } else if (methodName.includes('bank')) {
+            const accountNumber = document.getElementById('account_number').value;
+            const routingNumber = document.getElementById('routing_number').value;
+
+            if (!accountNumber || !routingNumber) {
+                isValid = false;
+                alert('Please fill in all bank details');
+            }
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+        }
     });
 </script>

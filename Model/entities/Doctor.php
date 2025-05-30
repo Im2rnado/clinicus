@@ -67,11 +67,19 @@ class Doctor extends AbstractUser
 
     public function read($id)
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Doctors WHERE ID = ?");
+        $query = "SELECT d.*, u.FirstName, u.LastName, u.email, u.phone, 
+                        dt.Specialization as specialization,
+                        d.consultation_fee as consultation_fee
+                 FROM Doctors d 
+                 JOIN Users u ON d.userID = u.userID 
+                 JOIN doctor_types dt ON d.doctorType = dt.ID
+                 WHERE d.ID = ?";
+
+        $stmt = $this->conn->prepare($query);
         $stmt->bind_param("i", $id);
         $stmt->execute();
-        $res = $stmt->get_result();
-        $doctor = $res->fetch_object();
+        $result = $stmt->get_result();
+        $doctor = $result->fetch_assoc();
         $stmt->close();
         return $doctor;
     }

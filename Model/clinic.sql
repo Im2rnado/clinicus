@@ -63,6 +63,7 @@ CREATE TABLE `doctors` (
   `Specialization` varchar(255) NOT NULL,
   `YearsOfExperience` int NOT NULL,
   `Rating` int,
+  `consultation_fee` decimal(10,2) NOT NULL DEFAULT 0.00,
   PRIMARY KEY (`Id`),
   FOREIGN KEY (`UserId`) REFERENCES `users`(`Id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;

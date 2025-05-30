@@ -1,6 +1,8 @@
 <?php
 namespace Model\entities;
 
+require_once __DIR__ . "/../abstract/AbstractModel.php";
+
 use Model\abstract\AbstractModel;
 
 class Payment extends AbstractModel
@@ -148,12 +150,25 @@ class Payment extends AbstractModel
 
     public function getPaymentMethods()
     {
-        return [
-            'credit_card' => 'Credit Card',
-            'debit_card' => 'Debit Card',
-            'paypal' => 'PayPal',
-            'bank_transfer' => 'Bank Transfer'
-        ];
+        $sql = "SELECT ID, name FROM Payment_Methods";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $methods = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $methods;
+    }
+
+    public function getPaymentOptions($type)
+    {
+        $sql = "SELECT ID, name FROM Options WHERE Type = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $type);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $options = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $options;
     }
 
     public function getPaymentStatuses()
