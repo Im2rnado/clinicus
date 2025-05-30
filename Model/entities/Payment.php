@@ -23,30 +23,23 @@ class Payment extends AbstractModel
 
     public function create($data)
     {
-        $stmt = $this->conn->prepare("
-            INSERT INTO Payment (appointmentID, userID, amount, paymentMethod, status, transactionID, createdAt, updatedAt)
-            VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
-        ");
+        try {
+            $sql = "INSERT INTO {$this->tableName} (appointmentID, userID, amount, paymentMethod, status, transactionID, createdAt, updatedAt) 
+                    VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
+            $stmt = $this->conn->prepare($sql);
 
-        $stmt->bind_param(
-            "iidsss",
-            $data['appointmentID'],
-            $data['userID'],
-            $data['amount'],
-            $data['paymentMethod'],
-            $data['status'],
-            $data['transactionID']
-        );
-
-        $result = $stmt->execute();
-        $stmt->close();
-
-        if ($result) {
-            // Update appointment status to paid
-            $this->updateAppointmentStatus($data['appointmentID']);
+            return $stmt->execute([
+                $data['appointmentID'],
+                $data['userID'],
+                $data['amount'],
+                $data['paymentMethod'],
+                $data['status'],
+                $data['transactionID']
+            ]);
+        } catch (\Exception $e) {
+            error_log('Exception in Payment::create: ' . $e->getMessage());
+            return false;
         }
-
-        return $result;
     }
 
     public function read($id)
@@ -171,5 +164,35 @@ class Payment extends AbstractModel
             'failed' => 'Failed',
             'refunded' => 'Refunded'
         ];
+    }
+
+    public function getPaymentsByUserId($userId)
+    {
+        $sql = "SELECT p.*, a.appointmentDate, d.FirstName as doctorFirstName, d.LastName as doctorLastName 
+                FROM Payment p 
+                JOIN Appointment a ON p.appointmentID = a.ID 
+                JOIN Doctors d ON a.DoctorID = d.ID 
+                WHERE p.userID = ? 
+                ORDER BY p.createdAt DESC";
+
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $payments = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $payments;
+    }
+
+    public function getPaymentByAppointmentId($appointmentId)
+    {
+        $sql = "SELECT * FROM Payment WHERE appointmentID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $appointmentId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $payment = $result->fetch_assoc();
+        $stmt->close();
+        return $payment;
     }
 }

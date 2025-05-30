@@ -23,17 +23,24 @@ class Appointment implements iAppointmentActions
      */
     public function create($data)
     {
-        $sql = "INSERT INTO {$this->tableName} (userID, DoctorID, appointmentDate, reason, status, createdAt, updatedAt) 
-                VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
-        $stmt = $this->db->prepare($sql);
+        try {
+            $sql = "INSERT INTO {$this->tableName} (DoctorID, userID, appointmentDate, reason, status, createdAt, updatedAt) 
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+            $stmt = $this->db->prepare($sql);
 
-        return $stmt->execute([
-            $data['userID'],
-            $data['DoctorID'],
-            $data['appointmentDate'],
-            $data['reason'],
-            $data['status']
-        ]);
+            $result = $stmt->execute([
+                $data['DoctorID'],
+                $data['userID'],
+                $data['appointmentDate'],
+                $data['reason'],
+                $data['status']
+            ]);
+
+            return $result;
+        } catch (\Exception $e) {
+            error_log('Exception in Appointment::create: ' . $e->getMessage());
+            return false;
+        }
     }
 
     /**
@@ -150,7 +157,7 @@ class Appointment implements iAppointmentActions
     public function getAppointmentsByUser($userId)
     {
         $sql = "SELECT a.*, 
-                CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
+                CONCAT(u.FirstName, ' ', u.LastName) as doctorName,
                 CASE 
                     WHEN a.status = 0 THEN 'Pending'
                     WHEN a.status = 1 THEN 'Confirmed'
@@ -165,12 +172,14 @@ class Appointment implements iAppointmentActions
                 END as statusColor
                 FROM {$this->tableName} a
                 JOIN Doctors d ON a.DoctorID = d.ID
+                JOIN Users u ON a.userID = u.userID
                 WHERE a.userID = ?
                 ORDER BY a.appointmentDate DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $stmt->get_result();
+        return $result->fetch_all(MYSQLI_ASSOC);
     }
 
     /**

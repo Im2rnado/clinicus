@@ -5,7 +5,7 @@ $title = 'My Appointments';
 <div class="container py-4">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3">My Appointments</h1>
-        <a href="./appointments/create" class="btn btn-primary">
+        <a href="/clinicus/appointments/create" class="btn btn-primary">
             <i class="fas fa-plus"></i> Book New Appointment
         </a>
     </div>
@@ -53,11 +53,11 @@ $title = 'My Appointments';
                                             <i class="fas fa-times"></i> Cancel
                                         </button>
                                     </form>
-                                    <a href="./payments/create/<?php echo $appointment['ID']; ?>" class="btn btn-sm btn-success">
+                                    <a href="/clinicus/payments/create/<?php echo $appointment['ID']; ?>" class="btn btn-sm btn-success">
                                         <i class="fas fa-credit-card"></i> Pay
                                     </a>
                                 <?php elseif ($appointment['status'] === 'Completed'): ?>
-                                    <a href="./ratings/create/<?php echo $appointment['ID']; ?>" class="btn btn-sm btn-info">
+                                    <a href="/clinicus/ratings/create/<?php echo $appointment['ID']; ?>" class="btn btn-sm btn-info">
                                         <i class="fas fa-star"></i> Rate
                                     </a>
                                 <?php endif; ?>
