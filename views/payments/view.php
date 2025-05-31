@@ -22,7 +22,8 @@ $title = "Payment Details - Clinicus";
                                     <span class="text-muted"><?php echo $payment['transactionID']; ?></span>
                                 </p>
                                 <p><strong>Payment Date:</strong><br>
-                                    <span class="text-muted"><?php echo date('F j, Y g:i A', strtotime($payment['createdAt'])); ?></span>
+                                    <span
+                                        class="text-muted"><?php echo date('F j, Y g:i A', strtotime($payment['createdAt'])); ?></span>
                                 </p>
                                 <p><strong>Payment Method:</strong><br>
                                     <span class="badge bg-info">
@@ -32,10 +33,12 @@ $title = "Payment Details - Clinicus";
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Amount:</strong><br>
-                                    <span class="h4 text-success">$<?php echo number_format($payment['amount'], 2); ?></span>
+                                    <span
+                                        class="h4 text-success">$<?php echo number_format($payment['amount'], 2); ?></span>
                                 </p>
                                 <p><strong>Status:</strong><br>
-                                    <span class="badge bg-<?php echo $payment['status'] === 'completed' ? 'success' : 'warning'; ?>">
+                                    <span
+                                        class="badge bg-<?php echo $payment['status'] === 'completed' ? 'success' : 'warning'; ?>">
                                         <?php echo ucfirst($payment['status']); ?>
                                     </span>
                                 </p>
@@ -50,18 +53,18 @@ $title = "Payment Details - Clinicus";
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Doctor:</strong><br>
-                                    <span class="text-muted">Dr. <?php echo htmlspecialchars($payment['doctorFirstName'] . ' ' . $payment['doctorLastName']); ?></span>
+                                    <span class="text-muted">Dr.
+                                        <?php echo htmlspecialchars($payment['doctorName']); ?></span>
                                 </p>
                                 <p><strong>Specialization:</strong><br>
-                                    <span class="text-muted"><?php echo htmlspecialchars($payment['specialization']); ?></span>
+                                    <span
+                                        class="text-muted"><?php echo htmlspecialchars($payment['specialization']); ?></span>
                                 </p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Appointment Date:</strong><br>
-                                    <span class="text-muted"><?php echo date('F j, Y', strtotime($payment['appointmentDate'])); ?></span>
-                                </p>
-                                <p><strong>Appointment Time:</strong><br>
-                                    <span class="text-muted"><?php echo date('h:i A', strtotime($payment['appointmentTime'])); ?></span>
+                                    <span
+                                        class="text-muted"><?php echo date('F j, Y', strtotime($payment['appointmentDate'])); ?></span>
                                 </p>
                             </div>
                         </div>
@@ -93,9 +96,12 @@ $title = "Payment Details - Clinicus";
 
 <style>
     @media print {
-        .btn, .no-print {
+
+        .btn,
+        .no-print {
             display: none !important;
         }
+
         .box {
             border: none !important;
             box-shadow: none !important;

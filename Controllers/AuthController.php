@@ -48,8 +48,7 @@ class AuthController extends Controller
                         $this->redirect('/clinicus/admin/dashboard');
                     } else if ($user['roleID'] === 2) {
                         $this->redirect('/clinicus/doctor/dashboard');
-                    }
-                    else {
+                    } else {
                         $this->redirect('/clinicus/patient/dashboard');
                     }
                 } else {

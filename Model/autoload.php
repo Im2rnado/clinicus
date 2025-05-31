@@ -10,7 +10,9 @@ spl_autoload_register(function ($class) {
         'Model/',
         'Model/entities/',
         'Model/abstract/',
-        'Model/interfaces/'
+        'Model/interfaces/',
+        'Model/strategies/',
+        'Model/decorators/',
     ];
 
     // Look for the class in each directory

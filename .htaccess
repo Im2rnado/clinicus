@@ -10,8 +10,5 @@ RewriteCond %{REQUEST_FILENAME} -d
 # makes sure actual files (like CSS, JS, images) still work normally
 RewriteRule ^ - [L] 
 
-# if the URL starts with admin/anything, it gets rewritten to admin/index.php
-RewriteRule ^admin/(.*)$ admin/index.php [L] 
-
 # Rewrite everything else to index.php
 RewriteRule ^ index.php [L] 

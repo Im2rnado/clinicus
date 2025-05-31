@@ -1,154 +1,128 @@
+<?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+require_once __DIR__ . '/../../Model/config.php';
+require_once __DIR__ . '/../../Model/autoload.php';
+
+use Model\entities\ModelFactory;
+
+// Check if user is logged in and is an admin
+if (!isset($_SESSION['user_id']) || !isset($_SESSION['user_type']) || $_SESSION['user_type'] !== 1) {
+    header('Location: /clinicus/auth/login');
+    exit;
+}
+
+$db = (new DatabaseConnection())->connectToDB();
+$userModel = ModelFactory::getModelInstance('users', $db);
+$user = $userModel->read($_SESSION['user_id']);
+?>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clinicus Admin - <?php echo $title ?? 'Dashboard'; ?></title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
-    <style>
-        .sidebar {
-            min-height: calc(100vh - 56px);
-            background: #f8f9fa;
-            padding: 20px;
-            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
-        }
+    <title><?php echo $title ?? 'Admin Dashboard - Clinicus'; ?></title>
 
-        .sidebar .list-group-item {
-            border-radius: 0;
-            border-left: 0;
-            border-right: 0;
-        }
-
-        .sidebar .list-group-item.active {
-            background-color: #0d6efd;
-            border-color: #0d6efd;
-        }
-
-        .content-wrapper {
-            padding: 20px;
-        }
-
-        .navbar-brand {
-            font-weight: bold;
-        }
-
-        .alert-dismissible {
-            margin-bottom: 20px;
-        }
-    </style>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link href="/clinicus/assets/css/style.css" rel="stylesheet">
 </head>
 
 <body>
+    <!-- Navigation -->
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand" href="./admin">Clinicus Admin</a>
-            <div class="d-flex">
-                <a href="./" class="btn btn-outline-light me-2">
-                    <i class="bi bi-house"></i> Back to Home
-                </a>
-                <a href="./logout.php" class="btn btn-outline-light">
-                    <i class="bi bi-box-arrow-right"></i> Logout
-                </a>
+        <div class="container">
+            <a class="navbar-brand" href="/clinicus/admin">
+                <i class="fas fa-hospital me-2"></i>Clinicus Admin
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clinicus/admin">
+                            <i class="fas fa-tachometer-alt me-1"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clinicus/admin/users">
+                            <i class="fas fa-users me-1"></i> Users
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clinicus/admin/doctors">
+                            <i class="fas fa-user-md me-1"></i> Doctors
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/clinicus/admin/appointments">
+                            <i class="fas fa-calendar-check me-1"></i> Appointments
+                        </a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
+                            data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle me-1"></i>
+                            <?php echo htmlspecialchars($user['FirstName'] . ' ' . $user['LastName']); ?>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-end">
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="/clinicus/auth/logout">
+                                <i class="fas fa-sign-out-alt me-2"></i> Logout
+                            </a>
+                        </div>
+                    </li>
+                </ul>
             </div>
         </div>
     </nav>
 
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-md-2 sidebar">
-                <h5 class="mb-3">Database Tables</h5>
-                <div class="list-group mb-4">
-                    <?php
-                    $menuItems = [
-                        ['url' => '/clinicus/admin/users?table=users', 'icon' => 'bi-people', 'text' => 'Users'],
-                        ['url' => '/clinicus/admin/usertype?table=usertype', 'icon' => 'bi-person-badge', 'text' => 'User Types'],
-                        ['url' => '/clinicus/admin/doctors?table=doctors', 'icon' => 'bi-clipboard2-pulse', 'text' => 'Doctors'],
-                        ['url' => '/clinicus/admin/patients?table=patients', 'icon' => 'bi-person-plus', 'text' => 'Patients'],
-                        ['url' => '/clinicus/admin/staff?table=staff', 'icon' => 'bi-person-workspace', 'text' => 'Staff'],
-                        ['url' => '/clinicus/admin/appointments?table=appointments', 'icon' => 'bi-calendar-check', 'text' => 'Appointments'],
-                        ['url' => '/clinicus/admin/medications?table=medications', 'icon' => 'bi-file-earmark-medical', 'text' => 'Medications'],
-                        ['url' => '/clinicus/admin/medical_history?table=medical_history', 'icon' => 'bi-journal-medical', 'text' => 'Medical History'],
-                        ['url' => '/clinicus/admin/audit_logs?table=audit_logs', 'icon' => 'bi-list-check', 'text' => 'Audit Logs'],
-                        ['url' => '/clinicus/admin/services?table=services', 'icon' => 'bi-briefcase', 'text' => 'Services'],
-                        ['url' => '/clinicus/admin/service_types?table=service_types', 'icon' => 'bi-tags', 'text' => 'Service Types'],
-                        ['url' => '/clinicus/admin/units?table=units', 'icon' => 'bi-rulers', 'text' => 'Units'],
-                        ['url' => '/clinicus/admin/user_type_pages?table=user_type_pages', 'icon' => 'bi-file-earmark', 'text' => 'User Type Pages'],
-                        ['url' => '/clinicus/admin/words?table=words', 'icon' => 'bi-translate', 'text' => 'Words'],
-                        ['url' => '/clinicus/admin/address?table=address', 'icon' => 'bi-geo-alt', 'text' => 'Addresses'],
-                        ['url' => '/clinicus/admin/appointment_details?table=appointment_details', 'icon' => 'bi-calendar2-check', 'text' => 'Appointment Details'],
-                        ['url' => '/clinicus/admin/blood_type?table=blood_type', 'icon' => 'bi-droplet', 'text' => 'Blood Types'],
-                        ['url' => '/clinicus/admin/category?table=category', 'icon' => 'bi-grid', 'text' => 'Categories'],
-                        ['url' => '/clinicus/admin/department?table=department', 'icon' => 'bi-building', 'text' => 'Departments'],
-                        ['url' => '/clinicus/admin/doctor_type?table=doctor_type', 'icon' => 'bi-person-badge', 'text' => 'Doctor Types'],
-                        ['url' => '/clinicus/admin/dosage_form?table=dosage_form', 'icon' => 'bi-capsule', 'text' => 'Dosage Forms'],
-                        ['url' => '/clinicus/admin/email?table=email', 'icon' => 'bi-envelope', 'text' => 'Emails'],
-                        ['url' => '/clinicus/admin/insurance_provider?table=insurance_provider', 'icon' => 'bi-shield-check', 'text' => 'Insurance Providers'],
-                        ['url' => '/clinicus/admin/languages?table=languages', 'icon' => 'bi-translate', 'text' => 'Languages'],
-                        ['url' => '/clinicus/admin/medication_info?table=medication_info', 'icon' => 'bi-capsule', 'text' => 'Medication Info'],
-                        ['url' => '/clinicus/admin/messages?table=messages', 'icon' => 'bi-chat', 'text' => 'Messages'],
-                        ['url' => '/clinicus/admin/message_type?table=message_type', 'icon' => 'bi-chat-dots', 'text' => 'Message Types'],
-                        ['url' => '/clinicus/admin/pages?table=pages', 'icon' => 'bi-file-earmark-text', 'text' => 'Pages'],
-                        ['url' => '/clinicus/admin/patient_insurance?table=patient_insurance', 'icon' => 'bi-shield', 'text' => 'Patient Insurance'],
-                        ['url' => '/clinicus/admin/payment_method?table=payment_method', 'icon' => 'bi-credit-card', 'text' => 'Payment Methods'],
-                        ['url' => '/clinicus/admin/payment_method_option?table=payment_method_option', 'icon' => 'bi-credit-card-2-front', 'text' => 'Payment Method Options'],
-                        ['url' => '/clinicus/admin/payment_option?table=payment_option', 'icon' => 'bi-cash', 'text' => 'Payment Options'],
-                        ['url' => '/clinicus/admin/payment_value?table=payment_value', 'icon' => 'bi-currency-dollar', 'text' => 'Payment Values'],
-                        ['url' => '/clinicus/admin/positions?table=positions', 'icon' => 'bi-person-lines-fill', 'text' => 'Positions'],
-                        ['url' => '/clinicus/admin/telephone?table=telephone', 'icon' => 'bi-telephone', 'text' => 'Telephones'],
-                        ['url' => '/clinicus/admin/translation?table=translation', 'icon' => 'bi-translate', 'text' => 'Translations'],
-                        ['url' => '/clinicus/admin/translation_details?table=translation_details', 'icon' => 'bi-translate', 'text' => 'Translation Details']
-                    ];
-
-                    foreach ($menuItems as $item) {
-                        $isActive = (isset($tableName) && strpos($item['url'], "table.php?table=$tableName") !== false) ? 'active' : '';
-                        echo '<a href="' . $item['url'] . '" class="list-group-item list-group-item-action ' . $isActive . '">';
-                        echo '<i class="bi ' . $item['icon'] . '"></i> ' . $item['text'];
-                        echo '</a>';
-                    }
-                    ?>
-                </div>
+    <!-- Main Content -->
+    <main>
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                <?php
+                echo $_SESSION['success'];
+                unset($_SESSION['success']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
-            <!-- Notification system -->
-            <div class="col-md-10 content-wrapper">
-                <?php if (isset($_GET['success'])): ?>
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <?php
-                        $message = 'Operation completed successfully';
-                        if ($_GET['success'] == 'created')
-                            $message = 'Record created successfully';
-                        if ($_GET['success'] == 'updated')
-                            $message = 'Record updated successfully';
-                        if ($_GET['success'] == 'deleted')
-                            $message = 'Record deleted successfully';
-                        echo $message;
-                        ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <?php endif; ?>
+        <?php endif; ?>
 
-                <?php if (isset($_GET['error'])): ?>
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <?php
-                        $error = $_GET['error'];
-                        if ($error === 'invalid_table') {
-                            echo 'Invalid table name specified';
-                        } else {
-                            echo htmlspecialchars($error);
-                        }
-                        ?>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                <?php endif; ?>
-
-                <?php echo $content ?? ''; ?>
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+                <?php
+                echo $_SESSION['error'];
+                unset($_SESSION['error']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
+        <?php endif; ?>
+
+        <?php echo $content; ?>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-light py-4 mt-auto">
+        <div class="container text-center">
+            <p class="mb-0">&copy; <?php echo date('Y'); ?> Clinicus. All rights reserved.</p>
         </div>
-    </div>
+    </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Custom JavaScript -->
+    <script src="/clinicus/assets/js/script.js"></script>
 </body>
 
 </html>

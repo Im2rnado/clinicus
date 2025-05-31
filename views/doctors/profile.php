@@ -1,93 +1,120 @@
 <?php
-$title = 'Doctor Profile';
+$title = "Profile - Clinicus";
 ?>
 
 <div class="container py-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>Profile Management</h2>
+        </div>
+    </div>
+
+    <?php if (isset($_SESSION['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?php
+            echo $_SESSION['success'];
+            unset($_SESSION['success']);
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
+    <?php if (isset($_SESSION['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?php
+            echo $_SESSION['error'];
+            unset($_SESSION['error']);
+            ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    <?php endif; ?>
+
     <div class="row">
-        <div class="col-md-4 mb-4">
+        <div class="col-md-8">
             <div class="card">
-                <div class="card-body text-center">
-                    <img src="<?php echo $doctor['image'] ?? '/assets/images/default-doctor.jpg'; ?>"
-                        alt="Dr. <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>"
-                        class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
-
-                    <h4 class="card-title mb-3">Dr.
-                        <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
-                    </h4>
-
-                    <div class="mb-3">
-                        <div class="display-4 text-warning mb-2">
-                            <?php echo number_format($doctor['rating'], 1); ?>
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Personal Information</h5>
+                </div>
+                <div class="card-body">
+                    <form action="/clinicus/doctor/updateProfile" method="POST">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="first_name" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="first_name" name="first_name"
+                                    value="<?php echo htmlspecialchars($doctor['FirstName'] ?? ''); ?>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="last_name" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="last_name" name="last_name"
+                                    value="<?php echo htmlspecialchars($doctor['LastName'] ?? ''); ?>" required>
+                            </div>
                         </div>
-                        <div class="rating-stars-static">
-                            <?php
-                            $rating = round($doctor['rating']);
-                            for ($i = 1; $i <= 5; $i++) {
-                                $color = $i <= $rating ? '#ffd700' : '#ddd';
-                                echo "<i class='fas fa-star' style='color: {$color};'></i>";
-                            }
-                            ?>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                    value="<?php echo htmlspecialchars($doctor['email'] ?? ''); ?>" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                    value="<?php echo htmlspecialchars($doctor['phone'] ?? ''); ?>" required>
+                            </div>
                         </div>
-                        <a href="./ratings/view/<?php echo $doctor['ID']; ?>" class="text-muted mt-2 d-block">
-                            View all reviews
-                        </a>
-                    </div>
 
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Specialization</h6>
-                        <p class="mb-0"><?php echo htmlspecialchars($doctor['Specialization']); ?></p>
-                    </div>
+                        <div class="mb-3">
+                            <label for="consultation_fee" class="form-label">Consultation Fee ($)</label>
+                            <input type="number" class="form-control" id="consultation_fee" name="consultation_fee"
+                                value="<?php echo htmlspecialchars($doctor['consultation_fee'] ?? '0'); ?>" required
+                                min="0" step="0.01">
+                        </div>
 
-                    <div class="mb-3">
-                        <h6 class="text-muted mb-2">Contact Information</h6>
-                        <p class="mb-1">
-                            <i class="fas fa-envelope text-primary me-2"></i>
-                            <?php echo htmlspecialchars($doctor['Email']); ?>
-                        </p>
-                        <p class="mb-0">
-                            <i class="fas fa-phone text-primary me-2"></i>
-                            <?php echo htmlspecialchars($doctor['Phone']); ?>
-                        </p>
-                    </div>
-
-                    <a href="./appointments/create?doctor=<?php echo $doctor['ID']; ?>" class="btn btn-primary">
-                        <i class="fas fa-calendar-plus"></i> Book Appointment
-                    </a>
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
+        <div class="col-md-4">
             <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Account Statistics</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title mb-3">About</h5>
-                    <p class="card-text"><?php echo nl2br(htmlspecialchars($doctor['Bio'])); ?></p>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Total Patients</label>
+                        <p><?php echo $doctor['totalPatients'] ?? 0; ?></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Total Appointments</label>
+                        <p><?php echo $doctor['totalAppointments'] ?? 0; ?></p>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Rating</label>
+                        <p>
+                            <i class="fas fa-star text-warning"></i>
+                            <?php echo number_format($doctor['rating'] ?? 0, 1); ?>
+                        </p>
+                    </div>
                 </div>
             </div>
 
             <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Specialization</h5>
+                </div>
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Education & Experience</h5>
-                    <div class="mb-4">
-                        <h6 class="text-muted mb-2">Education</h6>
-                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($doctor['Education'])); ?></p>
-                    </div>
-                    <div>
-                        <h6 class="text-muted mb-2">Experience</h6>
-                        <p class="mb-0"><?php echo nl2br(htmlspecialchars($doctor['Experience'])); ?></p>
-                    </div>
+                    <p class="mb-0">
+                        <i class="fas fa-graduation-cap me-2"></i>
+                        <?php echo htmlspecialchars($doctor['specialization'] ?? 'Not specified'); ?>
+                    </p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-    .rating-stars-static {
-        font-size: 1.2rem;
-    }
-
-    .rating-stars-static i {
-        margin: 0 0.1em;
-    }
-</style>

@@ -50,8 +50,9 @@ class Staff extends AbstractUser
         $userCreated = false;
         if (isset($data['user'])) {
             $user = new User($this->conn);
-            $userCreated = $user->create($data['user']);
+            $user->create($data['user']);
             $userId = $this->conn->insert_id;
+            $userCreated = true;
         } else {
             $userId = $data['userID'];
             $userCreated = true;
@@ -106,5 +107,13 @@ class Staff extends AbstractUser
         $result = $stmt->execute();
         $stmt->close();
         return $result;
+    }
+
+    public function getCount()
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM Staff");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_assoc()['COUNT(*)'];
     }
 }

@@ -51,29 +51,13 @@ class Appointment implements iAppointmentActions
      */
     public function read($id)
     {
-        $sql = "SELECT a.*, 
-                CONCAT(u.FirstName, ' ', u.LastName) as patientName,
-                CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
-                CASE 
-                    WHEN a.status = 0 THEN 'Pending'
-                    WHEN a.status = 1 THEN 'Confirmed'
-                    WHEN a.status = 2 THEN 'Cancelled'
-                    ELSE 'Completed'
-                END as status,
-                CASE 
-                    WHEN a.status = 0 THEN 'warning'
-                    WHEN a.status = 1 THEN 'success'
-                    WHEN a.status = 2 THEN 'danger'
-                    ELSE 'info'
-                END as statusColor
-                FROM {$this->tableName} a
-                JOIN Users u ON a.userID = u.userID
-                JOIN Doctors d ON a.DoctorID = d.ID
-                WHERE a.ID = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-
-        return $stmt->fetch(\PDO::FETCH_ASSOC);
+        $stmt = $this->db->prepare("SELECT * FROM Appointment WHERE ID = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $appointment = $result->fetch_assoc();
+        $stmt->close();
+        return $appointment;
     }
 
     /**
@@ -140,12 +124,18 @@ class Appointment implements iAppointmentActions
                 END as statusColor
                 FROM {$this->tableName} a
                 JOIN Users u ON a.userID = u.userID
-                JOIN Doctors d ON a.DoctorID = d.ID
+                JOIN Doctors doc ON a.DoctorID = doc.ID
+                JOIN Users d ON doc.userID = d.userID
                 ORDER BY a.appointmentDate DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
-
-        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        $result = $stmt->get_result();
+        $appointments = [];
+        while ($row = $result->fetch_assoc()) {
+            $appointments[] = $row;
+        }
+        $stmt->close();
+        return $appointments;
     }
 
     /**
@@ -562,11 +552,13 @@ class Appointment implements iAppointmentActions
                 s.Specialization as specialization,
                 ad.totalPrice
             FROM Appointment a
+            JOIN Users d ON a.DoctorID = d.userID
             JOIN Doctors doc ON a.DoctorID = doc.ID
-            JOIN Users d ON doc.userID = d.userID
             JOIN doctor_types s ON doc.doctorType = s.ID
             LEFT JOIN Appointment_Details ad ON a.ID = ad.appointmentID
-            WHERE a.userID = ? AND a.appointmentDate >= CURDATE()
+            WHERE a.userID = ? 
+            AND a.appointmentDate >= CURDATE()
+            AND a.status != 2
             ORDER BY a.appointmentDate ASC
         ");
         $stmt->bind_param("i", $patientId);
@@ -605,6 +597,94 @@ class Appointment implements iAppointmentActions
             WHERE ID = ? AND userID = ?
         ");
         $stmt->bind_param("ii", $id, $userId);
+        return $stmt->execute();
+    }
+
+    public function getCount()
+    {
+        $stmt = $this->db->prepare("SELECT COUNT(*) FROM Appointment");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_assoc()['COUNT(*)'];
+    }
+
+    public function getAppointmentsByDoctorAndDate($doctorId, $date)
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                a.*,
+                CONCAT(u.FirstName, ' ', u.LastName) as patientName,
+                a.status,
+                p.status as paymentStatus
+            FROM Appointment a
+            JOIN Users u ON a.userID = u.userID
+            LEFT JOIN Payment p ON a.ID = p.appointmentID
+            WHERE a.DoctorID = ? 
+            AND DATE(a.appointmentDate) = ?
+            ORDER BY a.appointmentDate ASC
+        ");
+        $stmt->bind_param("is", $doctorId, $date);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getAllAppointmentsByDoctor($doctorId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                a.*,
+                CONCAT(u.FirstName, ' ', u.LastName) as patientName,
+                a.status,
+                COALESCE(p.status, 'unpaid') as paymentStatus
+            FROM Appointment a
+            JOIN Users u ON a.userID = u.userID
+            LEFT JOIN Payment p ON a.ID = p.appointmentID
+            WHERE a.DoctorID = ?
+            ORDER BY a.appointmentDate DESC
+        ");
+        $stmt->bind_param("i", $doctorId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getUpcomingAppointmentsByDoctor($doctorId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT 
+                a.*,
+                CONCAT(u.FirstName, ' ', u.LastName) as patientName,
+                a.status,
+                p.status as paymentStatus
+            FROM Appointment a
+            JOIN Users u ON a.userID = u.userID
+            LEFT JOIN Payment p ON a.ID = p.appointmentID
+            WHERE a.DoctorID = ? 
+            AND a.appointmentDate > NOW()
+            AND a.status != 2
+            ORDER BY a.appointmentDate ASC
+        ");
+        $stmt->bind_param("i", $doctorId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    public function getTotalAppointmentsByDoctor($doctorId)
+    {
+        $stmt = $this->db->prepare("
+            SELECT COUNT(*) as total
+            FROM Appointment
+            WHERE DoctorID = ?
+        ");
+        $stmt->bind_param("i", $doctorId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['total'];
+    }
+
+    public function updateStatus($id, $status)
+    {
+        $stmt = $this->db->prepare("UPDATE Appointment SET status = ? WHERE ID = ?");
+        $stmt->bind_param("ii", $status, $id);
         return $stmt->execute();
     }
 }

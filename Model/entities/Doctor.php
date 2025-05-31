@@ -2,16 +2,19 @@
 // Model/entities/Doctor.php
 namespace Model\entities;
 
-require_once __DIR__ . '/../abstract/AbstractUser.php';
-use Model\abstract\AbstractUser;
+require_once __DIR__ . '/../abstract/AbstractModel.php';
+
+use Model\abstract\AbstractModel;
 use Model\entities\User;
 
-class Doctor extends AbstractUser
+class Doctor extends AbstractModel
 {
     public $ID;
+    public $userID;
+    public $doctorType;
     public $yearsOfExperince;
     public $rating;
-    public $doctorType;
+    public $consultation_fee;
     public $createdAt;
     public $updatedAt;
 
@@ -20,6 +23,7 @@ class Doctor extends AbstractUser
     public function __construct($db)
     {
         parent::__construct($db);
+        $this->tableName = 'Doctors';
         $this->conn = $db;
     }
 
@@ -45,37 +49,35 @@ class Doctor extends AbstractUser
 
     public function create($data)
     {
-        // Create user first, then doctor record
-        $userCreated = false;
-        if (isset($data['user'])) {
-            $user = new User($this->conn);
-            $userCreated = $user->create($data['user']);
-            $userId = $this->conn->insert_id;
-        } else {
-            $userId = $data['userID'];
-            $userCreated = true;
+        try {
+            $sql = "INSERT INTO {$this->tableName} (userID, doctorType, yearsOfExperince, rating, consultation_fee, createdAt, updatedAt) 
+                    VALUES (?, ?, ?, ?, ?, NOW(), NOW())";
+            $stmt = $this->conn->prepare($sql);
+
+            return $stmt->execute([
+                $data['userID'],
+                $data['doctorType'],
+                $data['yearsOfExperince'],
+                $data['rating'] ?? 0,
+                $data['consultation_fee'] ?? 0
+            ]);
+        } catch (\Exception $e) {
+            error_log('Exception in Doctor::create: ' . $e->getMessage());
+            return false;
         }
-        if ($userCreated) {
-            $stmt = $this->conn->prepare("INSERT INTO Doctors (userID, yearsOfExperince, rating, doctorType) VALUES (?, ?, ?, ?)");
-            $stmt->bind_param("iiii", $userId, $data['yearsOfExperince'], $data['rating'], $data['doctorType']);
-            $result = $stmt->execute();
-            $stmt->close();
-            return $result;
-        }
-        return false;
     }
 
     public function read($id)
     {
-        $query = "SELECT d.*, u.FirstName, u.LastName, u.email, u.phone, 
-                        dt.Specialization as specialization,
-                        d.consultation_fee as consultation_fee
-                 FROM Doctors d 
-                 JOIN Users u ON d.userID = u.userID 
-                 JOIN doctor_types dt ON d.doctorType = dt.ID
-                 WHERE d.ID = ?";
-
-        $stmt = $this->conn->prepare($query);
+        $stmt = $this->conn->prepare("
+            SELECT d.*, 
+                   CONCAT(u.FirstName, ' ', u.LastName) as doctorName,
+                   dt.Specialization as specialization
+            FROM {$this->tableName} d
+            JOIN Users u ON d.userID = u.userID
+            JOIN doctor_types dt ON d.doctorType = dt.ID
+            WHERE d.ID = ?
+        ");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -86,7 +88,16 @@ class Doctor extends AbstractUser
 
     public function readAll()
     {
-        $stmt = $this->conn->prepare("SELECT * FROM Doctors");
+        $stmt = $this->conn->prepare("
+            SELECT d.*, 
+                   u.FirstName,
+                   u.LastName,
+                   dt.Specialization as specialization
+            FROM {$this->tableName} d
+            JOIN Users u ON d.userID = u.userID
+            JOIN doctor_types dt ON d.doctorType = dt.ID
+            ORDER BY d.ID DESC
+        ");
         $stmt->execute();
         $res = $stmt->get_result();
         $doctors = [];
@@ -99,16 +110,32 @@ class Doctor extends AbstractUser
 
     public function update($id, $data)
     {
-        $stmt = $this->conn->prepare("UPDATE Doctors SET yearsOfExperince = ?, rating = ?, doctorType = ? WHERE ID = ?");
-        $stmt->bind_param("iiii", $data['yearsOfExperince'], $data['rating'], $data['doctorType'], $id);
-        $result = $stmt->execute();
-        $stmt->close();
-        return $result;
+        try {
+            $sql = "UPDATE {$this->tableName} SET 
+                    doctorType = ?, 
+                    yearsOfExperince = ?, 
+                    rating = ?, 
+                    consultation_fee = ?, 
+                    updatedAt = NOW() 
+                    WHERE ID = ?";
+            $stmt = $this->conn->prepare($sql);
+
+            return $stmt->execute([
+                $data['doctorType'],
+                $data['yearsOfExperince'],
+                $data['rating'],
+                $data['consultation_fee'],
+                $id
+            ]);
+        } catch (\Exception $e) {
+            error_log('Exception in Doctor::update: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function delete($id)
     {
-        $stmt = $this->conn->prepare("DELETE FROM Doctors WHERE ID = ?");
+        $stmt = $this->conn->prepare("DELETE FROM {$this->tableName} WHERE ID = ?");
         $stmt->bind_param("i", $id);
         $result = $stmt->execute();
         $stmt->close();
@@ -186,19 +213,58 @@ class Doctor extends AbstractUser
 
     public function getDoctorsBySpecialization($specializationId)
     {
-        $query = "SELECT d.*, u.FirstName, u.LastName, u.email, u.phone, a.name as address,
-                        dt.Specialization as specialization
-                 FROM Doctors d 
-                 JOIN Users u ON d.userID = u.userID 
-                 JOIN Address a ON u.addressID = a.ID 
-                 JOIN doctor_types dt ON d.doctorType = dt.ID
-                 WHERE d.doctorType = ?
-                 ORDER BY d.rating DESC, d.yearsOfExperince DESC";
-
-        $stmt = $this->conn->prepare($query);
+        $stmt = $this->conn->prepare("
+            SELECT d.*, 
+                   CONCAT(u.FirstName, ' ', u.LastName) as doctorName,
+                   dt.Specialization as specialization
+            FROM {$this->tableName} d
+            JOIN Users u ON d.userID = u.userID
+            JOIN doctor_types dt ON d.doctorType = dt.ID
+            WHERE d.doctorType = ?
+        ");
         $stmt->bind_param("i", $specializationId);
         $stmt->execute();
         $result = $stmt->get_result();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $doctors = $result->fetch_all(MYSQLI_ASSOC);
+        $stmt->close();
+        return $doctors;
+    }
+
+    public function updateRating($id, $newRating)
+    {
+        try {
+            $sql = "UPDATE {$this->tableName} SET rating = ?, updatedAt = NOW() WHERE ID = ?";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("di", $newRating, $id);
+            $result = $stmt->execute();
+            $stmt->close();
+            return $result;
+        } catch (\Exception $e) {
+            error_log('Exception in Doctor::updateRating: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    public function getCount()
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) as count FROM {$this->tableName}");
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+        return $row['count'];
+    }
+
+    public function getTotalPatients($doctorId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT COUNT(DISTINCT a.userID) as total
+            FROM Appointment a
+            WHERE a.DoctorID = ?
+        ");
+        $stmt->bind_param("i", $doctorId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        return $result->fetch_assoc()['total'];
     }
 }

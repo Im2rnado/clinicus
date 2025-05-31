@@ -26,6 +26,17 @@ class Payment extends AbstractModel
     public function create($data)
     {
         try {
+            // Get payment method name
+            $methodStmt = $this->conn->prepare("SELECT name FROM Payment_Methods WHERE ID = ?");
+            $methodStmt->bind_param("i", $data['paymentMethod']);
+            $methodStmt->execute();
+            $methodResult = $methodStmt->get_result();
+            $method = $methodResult->fetch_assoc();
+            $methodStmt->close();
+
+            // Set status based on payment method
+            $status = strtolower($method['name']) === 'cash' ? 'pending' : 'completed';
+
             $sql = "INSERT INTO {$this->tableName} (appointmentID, userID, amount, paymentMethod, status, transactionID, createdAt, updatedAt) 
                     VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())";
             $stmt = $this->conn->prepare($sql);
@@ -35,7 +46,7 @@ class Payment extends AbstractModel
                 $data['userID'],
                 $data['amount'],
                 $data['paymentMethod'],
-                $data['status'],
+                $status,
                 $data['transactionID']
             ]);
         } catch (\Exception $e) {
@@ -50,11 +61,14 @@ class Payment extends AbstractModel
             SELECT p.*, 
                    CONCAT(u.FirstName, ' ', u.LastName) as patientName,
                    CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
-                   a.appointmentDate
+                   a.appointmentDate,
+                   dt.Specialization as specialization
             FROM Payment p
             JOIN Users u ON p.userID = u.userID
             JOIN Appointment a ON p.appointmentID = a.ID
             JOIN Users d ON a.DoctorID = d.userID
+            JOIN Doctors doc ON a.DoctorID = doc.ID
+            JOIN doctor_types dt ON doc.doctorType = dt.ID
             WHERE p.ID = ?
         ");
 

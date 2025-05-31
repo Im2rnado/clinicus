@@ -11,11 +11,6 @@ define('APP_NAME', 'Clinicus');
 define('APP_URL', 'http://localhost/clinicus');
 define('APP_ROOT', dirname(__DIR__));
 
-// Session configuration
-define('SESSION_LIFETIME', 3600); // 1 hour
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
-session_set_cookie_params(SESSION_LIFETIME);
-
 // Error reporting
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

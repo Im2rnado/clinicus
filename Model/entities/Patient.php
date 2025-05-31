@@ -203,4 +203,12 @@ class Patient extends AbstractUser
         $stmt->close();
         return $result;
     }
+
+    public function getCount()
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM Patients");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_assoc()['COUNT(*)'];
+    }
 }

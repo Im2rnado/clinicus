@@ -59,7 +59,7 @@ $title = "Payment History - Clinicus";
                                     <small class="text-muted"><?php echo $payment['transactionID']; ?></small>
                                 </td>
                                 <td>
-                                    <a href="/clinicus/payments/view/<?php echo $payment['ID']; ?>"
+                                    <a href="/clinicus/payments/show/<?php echo $payment['ID']; ?>"
                                         class="btn btn-sm btn-outline-primary">
                                         <i class="fas fa-eye"></i> View
                                     </a>

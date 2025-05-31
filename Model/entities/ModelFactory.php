@@ -1,6 +1,17 @@
 <?php
-// Model/entities/ModelFactory.php
+
 namespace Model\entities;
+
+require_once __DIR__ . '/User.php';
+require_once __DIR__ . '/Patient.php';
+require_once __DIR__ . '/Doctor.php';
+require_once __DIR__ . '/Staff.php';
+require_once __DIR__ . '/Appointment.php';
+require_once __DIR__ . '/MedicalHistory.php';
+require_once __DIR__ . '/Services.php';
+
+
+
 
 class ModelFactory
 {
@@ -12,10 +23,8 @@ class ModelFactory
             'doctors' => 'Doctor',
             'staff' => 'Staff',
             'appointments' => 'Appointment',
-            'medications' => 'Medication',
             'medical_history' => 'MedicalHistory',
-            'audit_logs' => 'AuditLog',
-            'services' => 'Service',
+            'services' => 'Services',
             'service_types' => 'ServiceType',
             'units' => 'Unit',
             'usertype' => 'UserType',
@@ -47,7 +56,7 @@ class ModelFactory
             'telephone' => 'Telephone'
         ];
         if (!isset($map[$tableName])) {
-            $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 5);
+            $bt = debug_backtrace(options: DEBUG_BACKTRACE_IGNORE_ARGS);
             $trace = print_r($bt, true);
             throw new \Exception("[ModelFactory] Unknown table/entity: '$tableName'\nBacktrace:\n$trace");
         }

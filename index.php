@@ -1,10 +1,13 @@
 <?php
 
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Load configuration and autoloader
 require_once "Model/config.php";
 require_once "Model/autoload.php";
-
-// Start session
-session_start();
 
 // Get the request URI and remove any query strings
 $request_uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
@@ -27,10 +30,13 @@ $params = [];
 if (!empty($segments[0])) {
     $controller = ucfirst($segments[0]);
     if (!empty($segments[1])) {
-        // If the second segment is numeric, treat it as a parameter for 'show' action
-        if (is_numeric($segments[1])) {
-            $action = 'show';
-            $params = [$segments[1]];
+        // Handle special actions like delete and edit
+        if ($segments[1] === 'delete' || $segments[1] === 'edit') {
+            $action = $segments[1] . ucfirst($segments[0]);
+            // The ID should be the next segment
+            if (!empty($segments[2])) {
+                $params = [$segments[2]];
+            }
         } else {
             $action = $segments[1];
             // Any remaining segments are parameters

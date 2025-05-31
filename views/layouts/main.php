@@ -191,24 +191,45 @@
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav ms-auto">
                         <?php if (isset($_SESSION['user_id'])): ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/clinicus/patient/dashboard">
-                                    <i class="bi bi-speedometer2 me-1"></i>
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/clinicus/patient/appointments">
-                                    <i class="bi bi-calendar-check me-1"></i>
-                                    Appointments
-                                </a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link" href="/clinicus/patient/profile">
-                                    <i class="bi bi-person me-1"></i>
-                                    Profile
-                                </a>
-                            </li>
+                            <?php if ($_SESSION['user_type'] == 3): // Patient ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/patient/dashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/patient/appointments">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Appointments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/patient/profile">
+                                        <i class="bi bi-person me-1"></i>
+                                        Profile
+                                    </a>
+                                </li>
+                            <?php elseif ($_SESSION['user_type'] == 2): // Doctor ?>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/doctor/dashboard">
+                                        <i class="bi bi-speedometer2 me-1"></i>
+                                        Dashboard
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/doctor/appointments">
+                                        <i class="bi bi-calendar-check me-1"></i>
+                                        Appointments
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="/clinicus/doctor/profile">
+                                        <i class="bi bi-person me-1"></i>
+                                        Profile
+                                    </a>
+                                </li>
+                            <?php endif; ?>
                             <li class="nav-item">
                                 <a class="nav-link" href="/clinicus/auth/logout">
                                     <i class="bi bi-box-arrow-right me-1"></i>

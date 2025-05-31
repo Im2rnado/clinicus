@@ -148,4 +148,34 @@ class MedicalHistory extends AbstractMedicalHistory implements IHealthRecord
         $stmt->execute();
         return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     }
+
+    public function getCount()
+    {
+        $stmt = $this->conn->prepare("SELECT COUNT(*) FROM Medical_History");
+        $stmt->execute();
+        $res = $stmt->get_result();
+        return $res->fetch_assoc()['COUNT(*)'];
+    }
+
+    public function getMedicalHistoryByPatient($patientId)
+    {
+        $stmt = $this->conn->prepare("
+            SELECT 
+                mh.ID,
+                mh.description,
+                DATE_FORMAT(a.appointmentDate, '%Y-%m-%d') as date,
+                CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
+                s.name as serviceType
+            FROM Medical_History mh
+            JOIN Appointment a ON mh.appointmentID = a.ID
+            JOIN Doctors doc ON a.DoctorID = doc.ID
+            JOIN Users d ON doc.userID = d.userID
+            LEFT JOIN Services s ON mh.serviceID = s.ID
+            WHERE mh.patientID = ?
+            ORDER BY a.appointmentDate DESC
+        ");
+        $stmt->bind_param("i", $patientId);
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
 }
