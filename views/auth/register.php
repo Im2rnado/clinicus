@@ -189,7 +189,7 @@ $title = "Register - Clinicus";
                         </div>
 
                         <div class="text-center mt-3">
-                            <p class="mb-0">Already have an account? <a href="/auth/login">Login here</a></p>
+                            <p class="mb-0">Already have an account? <a href="./login">Login here</a></p>
                         </div>
                     </form>
                 </div>

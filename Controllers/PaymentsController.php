@@ -1,6 +1,10 @@
 <?php
 
-class PaymentController extends Controller
+include_once 'Model/entities/Payment.php';
+include_once 'Model/entities/Appointment.php';
+include_once 'Model/entities/Doctor.php';
+
+class PaymentsController extends Controller
 {
     private $paymentModel;
     private $appointmentModel;
@@ -22,6 +26,33 @@ class PaymentController extends Controller
 
         $this->render('payments/index', [
             'payments' => $payments
+        ]);
+    }
+
+    public function show($id)
+    {
+        $payment = $this->paymentModel->read($id);
+
+        if (!$payment) {
+            $_SESSION['error'] = 'Payment not found';
+            $this->redirect('/clinicus/payments');
+            return;
+        }
+
+        // Get appointment details
+        $appointment = $this->appointmentModel->read($payment['appointmentID']);
+
+        // Get doctor details
+        $doctor = $this->doctorModel->read($appointment['DoctorID']);
+
+        // Get payment method details
+        $paymentMethod = $this->paymentModel->getPaymentMethod($payment['paymentMethod']);
+
+        $this->render('payments/view', [
+            'payment' => $payment,
+            'appointment' => $appointment,
+            'doctor' => $doctor,
+            'paymentMethod' => $paymentMethod
         ]);
     }
 

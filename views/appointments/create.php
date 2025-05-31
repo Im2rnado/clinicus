@@ -163,10 +163,12 @@ $title = "Book Appointment - Clinicus";
                                 <p><strong>Time:</strong> <?php echo date('h:i A', strtotime($appointment_time)); ?></p>
                             </div>
                             <div class="col-md-6">
-                                <p><strong>Consultation Fee:</strong>
-                                    $<?php echo number_format($doctor['consultation_fee'] ?? 0, 2); ?></p>
-                                <p><strong>Total Amount:</strong>
-                                    $<?php echo number_format($doctor['consultation_fee'] ?? 0, 2); ?></p>
+                                <?php
+                                $consultation_fee = isset($doctor['consultation_fee']) ? $doctor['consultation_fee'] : 100; // Default fee if not set
+                                ?>
+                                <p><strong>Consultation Fee:</strong> $<?php echo number_format($consultation_fee, 2); ?>
+                                </p>
+                                <p><strong>Total Amount:</strong> $<?php echo number_format($consultation_fee, 2); ?></p>
                             </div>
                         </div>
                     </div>
@@ -282,29 +284,41 @@ $title = "Book Appointment - Clinicus";
 </div>
 
 <script>
-    // Set minimum date to today
-    document.getElementById('appointment_date').min = new Date().toISOString().split('T')[0];
+    // Only set minimum date if we're on step 2
+    const appointmentDateInput = document.getElementById('appointment_date');
+    if (appointmentDateInput) {
+        appointmentDateInput.min = new Date().toISOString().split('T')[0];
+    }
 
     // Format card number input
-    document.getElementById('card_number').addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        e.target.value = value;
-    });
+    const cardNumberInput = document.getElementById('card_number');
+    if (cardNumberInput) {
+        cardNumberInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+    }
 
     // Format expiry date input
-    document.getElementById('expiry_date').addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        if (value.length >= 2) {
-            value = value.slice(0, 2) + '/' + value.slice(2);
-        }
-        e.target.value = value;
-    });
+    const expiryDateInput = document.getElementById('expiry_date');
+    if (expiryDateInput) {
+        expiryDateInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            if (value.length >= 2) {
+                value = value.slice(0, 2) + '/' + value.slice(2);
+            }
+            e.target.value = value;
+        });
+    }
 
     // Format CVV input
-    document.getElementById('cvv').addEventListener('input', function (e) {
-        let value = e.target.value.replace(/\D/g, '');
-        e.target.value = value;
-    });
+    const cvvInput = document.getElementById('cvv');
+    if (cvvInput) {
+        cvvInput.addEventListener('input', function (e) {
+            let value = e.target.value.replace(/\D/g, '');
+            e.target.value = value;
+        });
+    }
 
     // Handle payment method selection
     document.querySelectorAll('.payment-method').forEach(radio => {
@@ -315,14 +329,30 @@ $title = "Book Appointment - Clinicus";
             document.getElementById('bank-details').style.display = 'none';
             document.getElementById('mobile-details').style.display = 'none';
 
-            // Show relevant section based on selection
-            const methodName = this.nextElementSibling.textContent.trim().toLowerCase();
+            // Get the method name from the label text
+            const methodName = this.closest('label').textContent.trim().toLowerCase();
+            console.log('Selected method:', methodName); // Debug log
+
+            // Remove required attribute from all payment detail inputs
+            const allPaymentInputs = document.querySelectorAll('#card-details input, #insurance-details input, #bank-details input');
+            allPaymentInputs.forEach(input => input.removeAttribute('required'));
+
             if (methodName.includes('credit') || methodName.includes('debit')) {
-                document.getElementById('card-details').style.display = 'block';
+                console.log('Showing card details'); // Debug log
+                const cardDetails = document.getElementById('card-details');
+                cardDetails.style.display = 'block';
+                // Add required attribute to card inputs
+                cardDetails.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
             } else if (methodName.includes('insurance')) {
-                document.getElementById('insurance-details').style.display = 'block';
+                const insuranceDetails = document.getElementById('insurance-details');
+                insuranceDetails.style.display = 'block';
+                // Add required attribute to insurance inputs
+                insuranceDetails.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
             } else if (methodName.includes('bank')) {
-                document.getElementById('bank-details').style.display = 'block';
+                const bankDetails = document.getElementById('bank-details');
+                bankDetails.style.display = 'block';
+                // Add required attribute to bank inputs
+                bankDetails.querySelectorAll('input').forEach(input => input.setAttribute('required', 'required'));
             } else if (methodName.includes('mobile')) {
                 document.getElementById('mobile-details').style.display = 'block';
             }
@@ -330,46 +360,53 @@ $title = "Book Appointment - Clinicus";
     });
 
     // Validate form before submission
-    document.getElementById('payment-form').addEventListener('submit', function (e) {
-        const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
-        if (!selectedMethod) {
-            e.preventDefault();
-            alert('Please select a payment method');
-            return;
-        }
+    const paymentForm = document.getElementById('payment-form');
+    if (paymentForm) {
+        paymentForm.addEventListener('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
 
-        const methodName = selectedMethod.nextElementSibling.textContent.trim().toLowerCase();
-        let isValid = true;
-
-        if (methodName.includes('credit') || methodName.includes('debit')) {
-            const cardNumber = document.getElementById('card_number').value;
-            const expiryDate = document.getElementById('expiry_date').value;
-            const cvv = document.getElementById('cvv').value;
-
-            if (!cardNumber || !expiryDate || !cvv) {
-                isValid = false;
-                alert('Please fill in all card details');
+            const selectedMethod = document.querySelector('input[name="payment_method"]:checked');
+            if (!selectedMethod) {
+                alert('Please select a payment method');
+                return;
             }
-        } else if (methodName.includes('insurance')) {
-            const provider = document.getElementById('insurance_provider').value;
-            const policyNumber = document.getElementById('policy_number').value;
 
-            if (!provider || !policyNumber) {
-                isValid = false;
-                alert('Please fill in all insurance details');
+            const methodName = selectedMethod.closest('label').textContent.trim().toLowerCase();
+            console.log('Submitting form with method:', methodName);
+
+            let isValid = true;
+
+            if (methodName.includes('credit') || methodName.includes('debit')) {
+                const cardNumber = document.getElementById('card_number').value;
+                const expiryDate = document.getElementById('expiry_date').value;
+                const cvv = document.getElementById('cvv').value;
+
+                if (!cardNumber || !expiryDate || !cvv) {
+                    isValid = false;
+                    alert('Please fill in all card details');
+                }
+            } else if (methodName.includes('insurance')) {
+                const provider = document.getElementById('insurance_provider').value;
+                const policyNumber = document.getElementById('policy_number').value;
+
+                if (!provider || !policyNumber) {
+                    isValid = false;
+                    alert('Please fill in all insurance details');
+                }
+            } else if (methodName.includes('bank')) {
+                const accountNumber = document.getElementById('account_number').value;
+                const routingNumber = document.getElementById('routing_number').value;
+
+                if (!accountNumber || !routingNumber) {
+                    isValid = false;
+                    alert('Please fill in all bank details');
+                }
             }
-        } else if (methodName.includes('bank')) {
-            const accountNumber = document.getElementById('account_number').value;
-            const routingNumber = document.getElementById('routing_number').value;
 
-            if (!accountNumber || !routingNumber) {
-                isValid = false;
-                alert('Please fill in all bank details');
+            if (isValid) {
+                console.log('Form is valid, submitting...');
+                this.submit(); // Submit the form if all validations pass
             }
-        }
-
-        if (!isValid) {
-            e.preventDefault();
-        }
-    });
+        });
+    }
 </script>

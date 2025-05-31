@@ -210,4 +210,12 @@ class Payment extends AbstractModel
         $stmt->close();
         return $payment;
     }
+
+    public function getPaymentMethod($paymentMethodId)
+    {
+        $sql = "SELECT * FROM Payment_Methods WHERE ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $paymentMethodId);
+        $stmt->execute();
+    }
 }

@@ -106,102 +106,72 @@ class AppointmentsController extends Controller
                 return;
             }
 
-            // If payment is submitted, process appointment and payment
+            // Handle final payment submission
             if (isset($_POST['payment_method'])) {
-                $doctorId = $_POST['doctor_id'] ?? '';
-                $appointmentDate = $_POST['appointment_date'] ?? '';
-                $appointmentTime = $_POST['appointment_time'] ?? '';
-                $reason = $_POST['reason'] ?? '';
-                $paymentMethod = $_POST['payment_method'] ?? '';
-                $cardNumber = $_POST['card_number'] ?? '';
-                $expiryDate = $_POST['expiry_date'] ?? '';
-                $cvv = $_POST['cvv'] ?? '';
+                try {
+                    // Start transaction
+                    $this->db->begin_transaction();
 
-                // Validate payment details
-                if (empty($paymentMethod)) {
-                    $errors['payment_method'] = 'Please select a payment method';
-                }
-                if (empty($cardNumber) || strlen($cardNumber) !== 16) {
-                    $errors['card_number'] = 'Please enter a valid card number';
-                }
-                if (empty($expiryDate) || !preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/', $expiryDate)) {
-                    $errors['expiry_date'] = 'Please enter a valid expiry date';
-                }
-                if (empty($cvv) || strlen($cvv) < 3 || strlen($cvv) > 4) {
-                    $errors['cvv'] = 'Please enter a valid CVV';
-                }
-
-                if (empty($errors)) {
-                    // Get doctor details for payment amount
-                    $doctor = $this->doctorModel->read($doctorId);
-                    // Convert doctor object to array
-                    $doctor = (array) $doctor;
-                    $amount = $doctor['consultation_fee'];
-
-                    // Create payment record
-                    $paymentModel = new \Model\entities\Payment($this->db);
-                    $paymentData = [
-                        'appointmentID' => null, // Will be updated after appointment creation
+                    // Create appointment
+                    $appointmentData = [
+                        'DoctorID' => $_POST['doctor_id'],
                         'userID' => $_SESSION['user_id'],
-                        'amount' => $amount,
-                        'paymentMethod' => $paymentMethod,
-                        'status' => 'completed',
-                        'transactionID' => uniqid('TRX')
+                        'appointmentDate' => $_POST['appointment_date'] . ' ' . $_POST['appointment_time'],
+                        'reason' => $_POST['reason'],
+                        'status' => 0, // Pending
+                        'createdAt' => date('Y-m-d H:i:s'),
+                        'updatedAt' => date('Y-m-d H:i:s')
                     ];
 
-                    // Start transaction
-                    $this->db->beginTransaction();
+                    $appointmentId = $this->appointmentModel->create($appointmentData);
 
-                    try {
-                        // Create appointment
-                        $appointmentDateTime = $appointmentDate . ' ' . $appointmentTime;
-                        $appointmentData = [
-                            'DoctorID' => $doctorId,
-                            'userID' => $_SESSION['user_id'],
-                            'appointmentDate' => $appointmentDateTime,
-                            'reason' => $reason,
-                            'status' => 1 // Set to confirmed since payment is completed
-                        ];
-
-                        if ($this->appointmentModel->create($appointmentData)) {
-                            $appointmentId = $this->db->lastInsertId();
-
-                            // Update payment with appointment ID
-                            $paymentData['appointmentID'] = $appointmentId;
-
-                            if ($paymentModel->create($paymentData)) {
-                                $this->db->commit();
-                                $_SESSION['success'] = 'Appointment booked and payment completed successfully!';
-                                $this->redirect('/clinicus/appointments');
-                            } else {
-                                throw new \Exception('Failed to create payment record');
-                            }
-                        } else {
-                            throw new \Exception('Failed to create appointment');
-                        }
-                    } catch (\Exception $e) {
-                        $this->db->rollBack();
-                        $errors['system'] = 'Failed to process payment: ' . $e->getMessage();
+                    if (!$appointmentId) {
+                        throw new Exception('Failed to create appointment');
                     }
-                }
 
-                // If we get here, there were errors
-                $doctor = $this->doctorModel->read($doctorId);
-                $this->render('appointments/create', [
-                    'step' => 3,
-                    'errors' => $errors,
-                    'doctor' => $doctor,
-                    'doctor_id' => $doctorId,
-                    'appointment_date' => $appointmentDate,
-                    'appointment_time' => $appointmentTime,
-                    'reason' => $reason,
-                    'specialization' => $_POST['specialization']
-                ]);
-                return;
+                    // Get doctor's consultation fee
+                    $doctor = $this->doctorModel->read($_POST['doctor_id']);
+                    $amount = $doctor['consultation_fee'] ?? 0;
+
+                    // Create payment record
+                    $paymentData = [
+                        'appointmentID' => $appointmentId,
+                        'userID' => $_SESSION['user_id'],
+                        'amount' => $amount,
+                        'paymentMethod' => $_POST['payment_method'],
+                        'status' => 'pending',
+                        'transactionID' => uniqid('TRANS_'),
+                        'createdAt' => date('Y-m-d H:i:s'),
+                        'updatedAt' => date('Y-m-d H:i:s')
+                    ];
+
+                    $paymentId = $this->paymentModel->create($paymentData);
+
+                    if (!$paymentId) {
+                        throw new Exception('Failed to create payment record');
+                    }
+
+                    // Commit transaction
+                    $this->db->commit();
+
+                    // Set success message
+                    $_SESSION['success'] = 'Appointment booked successfully! Please complete the payment.';
+
+                    // Redirect to payment confirmation page
+                    header('Location: /clinicus/payments/' . $paymentId);
+                    exit;
+
+                } catch (Exception $e) {
+                    // Rollback transaction on error
+                    $this->db->rollback();
+                    $_SESSION['error'] = 'Failed to book appointment: ' . $e->getMessage();
+                    header('Location: /clinicus/appointments/create');
+                    exit;
+                }
             }
         }
 
-        // Show specialization selection (step 1)
+        // Show initial form (Step 1)
         $specializations = $this->doctorModel->getAllSpecializations();
         $this->render('appointments/create', [
             'step' => 1,
