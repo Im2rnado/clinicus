@@ -27,9 +27,15 @@ $params = [];
 if (!empty($segments[0])) {
     $controller = ucfirst($segments[0]);
     if (!empty($segments[1])) {
-        $action = $segments[1];
-        // Any remaining segments are parameters
-        $params = array_slice($segments, 2);
+        // If the second segment is numeric, treat it as a parameter for 'show' action
+        if (is_numeric($segments[1])) {
+            $action = 'show';
+            $params = [$segments[1]];
+        } else {
+            $action = $segments[1];
+            // Any remaining segments are parameters
+            $params = array_slice($segments, 2);
+        }
     }
 }
 

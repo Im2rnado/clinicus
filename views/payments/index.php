@@ -41,9 +41,7 @@ $title = "Payment History - Clinicus";
                         <?php foreach ($payments as $payment): ?>
                             <tr>
                                 <td><?php echo date('M d, Y', strtotime($payment['createdAt'])); ?></td>
-                                <td>Dr.
-                                    <?php echo htmlspecialchars($payment['doctorFirstName'] . ' ' . $payment['doctorLastName']); ?>
-                                </td>
+                                <td>Dr. <?php echo htmlspecialchars($payment['doctorName']); ?></td>
                                 <td><?php echo date('M d, Y h:i A', strtotime($payment['appointmentDate'])); ?></td>
                                 <td>$<?php echo number_format($payment['amount'], 2); ?></td>
                                 <td>

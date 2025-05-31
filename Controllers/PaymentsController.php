@@ -105,17 +105,4 @@ class PaymentsController extends Controller
             ]);
         }
     }
-
-    public function view($id)
-    {
-        $payment = $this->paymentModel->read($id);
-
-        if ($payment && $payment['userID'] === $_SESSION['user_id']) {
-            $this->render('payments/view', [
-                'payment' => $payment
-            ]);
-        } else {
-            $this->redirect('/clinicus/payments');
-        }
-    }
 }

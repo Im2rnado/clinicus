@@ -54,7 +54,7 @@ class Payment extends AbstractModel
             FROM Payment p
             JOIN Users u ON p.userID = u.userID
             JOIN Appointment a ON p.appointmentID = a.ID
-            JOIN Doctors d ON a.DoctorID = d.ID
+            JOIN Users d ON a.DoctorID = d.userID
             WHERE p.ID = ?
         ");
 
@@ -107,7 +107,7 @@ class Payment extends AbstractModel
                    DATE_FORMAT(p.createdAt, '%M %d, %Y') as formattedDate
             FROM Payment p
             JOIN Appointment a ON p.appointmentID = a.ID
-            JOIN Doctors d ON a.DoctorID = d.ID
+            JOIN Users d ON a.DoctorID = d.userID
             WHERE p.userID = ?
             ORDER BY p.createdAt DESC
         ");
@@ -186,7 +186,7 @@ class Payment extends AbstractModel
         $sql = "SELECT p.*, a.appointmentDate, d.FirstName as doctorFirstName, d.LastName as doctorLastName 
                 FROM Payment p 
                 JOIN Appointment a ON p.appointmentID = a.ID 
-                JOIN Doctors d ON a.DoctorID = d.ID 
+                JOIN Users d ON a.DoctorID = d.userID
                 WHERE p.userID = ? 
                 ORDER BY p.createdAt DESC";
 
@@ -216,6 +216,18 @@ class Payment extends AbstractModel
         $sql = "SELECT * FROM Payment_Methods WHERE ID = ?";
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $paymentMethodId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $method = $result->fetch_assoc();
+        $stmt->close();
+        return $method;
+    }
+
+    public function getPaymentStatus($statusId)
+    {
+        $sql = "SELECT * FROM Payment_Statuses WHERE ID = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $statusId);
         $stmt->execute();
     }
 }
