@@ -77,10 +77,6 @@ $title = "My Appointments - Clinicus";
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="/clinicus/appointments/view/<?php echo $appointment['ID']; ?>"
-                                            class="btn btn-sm btn-outline-primary" title="View Details">
-                                            <i class="fas fa-eye">View</i>
-                                        </a>
                                         <?php if ($appointment['status'] === 'Pending' || $appointment['status'] === 'Confirmed'): ?>
                                             <a href="/clinicus/appointments/cancel/<?php echo $appointment['ID']; ?>"
                                                 class="btn btn-sm btn-outline-danger"

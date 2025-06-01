@@ -111,6 +111,17 @@ class Doctor extends AbstractModel
     public function update($id, $data)
     {
         try {
+            // Get existing doctor data
+            $existingDoctor = $this->read($id);
+
+            // Merge existing data with updates
+            $updateData = array_merge([
+                'doctorType' => $existingDoctor['doctorType'],
+                'yearsOfExperince' => $existingDoctor['yearsOfExperince'],
+                'rating' => $existingDoctor['rating'],
+                'consultation_fee' => $existingDoctor['consultation_fee']
+            ], $data);
+
             $sql = "UPDATE {$this->tableName} SET 
                     doctorType = ?, 
                     yearsOfExperince = ?, 
@@ -121,10 +132,10 @@ class Doctor extends AbstractModel
             $stmt = $this->conn->prepare($sql);
 
             return $stmt->execute([
-                $data['doctorType'],
-                $data['yearsOfExperince'],
-                $data['rating'],
-                $data['consultation_fee'],
+                $updateData['doctorType'],
+                $updateData['yearsOfExperince'],
+                $updateData['rating'],
+                $updateData['consultation_fee'],
                 $id
             ]);
         } catch (\Exception $e) {

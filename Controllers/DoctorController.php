@@ -221,25 +221,67 @@ class DoctorController extends Controller
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $doctorId = $_SESSION['user_id'];
-            $data = [
-                'FirstName' => $_POST['first_name'] ?? '',
-                'LastName' => $_POST['last_name'] ?? '',
-                'email' => $_POST['email'] ?? '',
-                'phone' => $_POST['phone'] ?? '',
-                'consultation_fee' => $_POST['consultation_fee'] ?? 0
-            ];
+            $errors = [];
+
+            // Get form data
+            $first_name = trim($_POST['first_name'] ?? '');
+            $last_name = trim($_POST['last_name'] ?? '');
+            $email = trim($_POST['email'] ?? '');
+            $phone = trim($_POST['phone'] ?? '');
+            $consultation_fee = floatval($_POST['consultation_fee'] ?? 0);
 
             // Validate required fields
-            if (empty($data['FirstName']) || empty($data['LastName']) || empty($data['email'])) {
-                $_SESSION['error'] = "Please fill in all required fields.";
-                header('Location: /clinicus/doctor/profile');
-                exit;
+            if (empty($first_name)) {
+                $errors['first_name'] = 'First name is required';
+            }
+            if (empty($last_name)) {
+                $errors['last_name'] = 'Last name is required';
+            }
+            if (empty($email)) {
+                $errors['email'] = 'Email is required';
+            } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $errors['email'] = 'Invalid email format';
+            }
+            if (empty($phone)) {
+                $errors['phone'] = 'Phone number is required';
+            }
+            if ($consultation_fee < 0) {
+                $errors['consultation_fee'] = 'Consultation fee cannot be negative';
             }
 
-            if ($this->userModel->update($doctorId, $data)) {
-                $_SESSION['success'] = "Profile updated successfully!";
+            if (empty($errors)) {
+                // Get existing user data
+                $existingUser = $this->userModel->read($doctorId);
+
+                // Update user information while preserving existing data
+                $userData = [
+                    'FirstName' => $first_name,
+                    'LastName' => $last_name,
+                    'email' => $email,
+                    'phone' => $phone,
+                    'username' => $existingUser['username'],
+                    'dob' => $existingUser['dob'],
+                    'addressID' => $existingUser['addressID'],
+                    'role' => $existingUser['role']
+                ];
+
+                $userUpdated = $this->userModel->update($doctorId, $userData);
+
+                // Update doctor information
+                $doctorData = [
+                    'consultation_fee' => $consultation_fee
+                ];
+
+                $doctorUpdated = $this->doctorModel->update($doctorId, $doctorData);
+
+                if ($userUpdated && $doctorUpdated) {
+                    $_SESSION['success'] = "Profile updated successfully!";
+                } else {
+                    $_SESSION['error'] = "Failed to update profile.";
+                }
             } else {
-                $_SESSION['error'] = "Failed to update profile.";
+                $_SESSION['error'] = "Please correct the errors in the form.";
+                $_SESSION['form_errors'] = $errors;
             }
 
             header('Location: /clinicus/doctor/profile');

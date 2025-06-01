@@ -65,9 +65,19 @@ $title = "Profile - Clinicus";
 
                         <div class="mb-3">
                             <label for="consultation_fee" class="form-label">Consultation Fee ($)</label>
-                            <input type="number" class="form-control" id="consultation_fee" name="consultation_fee"
+                            <input type="number"
+                                class="form-control <?php echo isset($_SESSION['form_errors']['consultation_fee']) ? 'is-invalid' : ''; ?>"
+                                id="consultation_fee" name="consultation_fee"
                                 value="<?php echo htmlspecialchars($doctor['consultation_fee'] ?? '0'); ?>" required
                                 min="0" step="0.01">
+                            <?php if (isset($_SESSION['form_errors']['consultation_fee'])): ?>
+                                <div class="invalid-feedback">
+                                    <?php
+                                    echo $_SESSION['form_errors']['consultation_fee'];
+                                    unset($_SESSION['form_errors']['consultation_fee']);
+                                    ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
 
                         <div class="text-end">
