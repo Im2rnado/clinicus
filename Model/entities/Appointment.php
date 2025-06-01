@@ -148,6 +148,7 @@ class Appointment implements iAppointmentActions
     {
         $sql = "SELECT a.*, 
                 CONCAT(u.FirstName, ' ', u.LastName) as doctorName,
+                dt.Specialization as specialization,
                 CASE 
                     WHEN a.status = 0 THEN 'Pending'
                     WHEN a.status = 1 THEN 'Confirmed'
@@ -159,17 +160,40 @@ class Appointment implements iAppointmentActions
                     WHEN a.status = 1 THEN 'success'
                     WHEN a.status = 2 THEN 'danger'
                     ELSE 'info'
-                END as statusColor
+                END as statusColor,
+                p.ID as payment_id,
+                p.amount as payment_amount,
+                COALESCE(p.status, 'unpaid') as payment_status
                 FROM {$this->tableName} a
                 JOIN Doctors d ON a.DoctorID = d.ID
-                JOIN Users u ON a.userID = u.userID
+                JOIN Users u ON d.userID = u.userID
+                JOIN doctor_types dt ON d.doctorType = dt.ID
+                LEFT JOIN Payment p ON a.ID = p.appointmentID
                 WHERE a.userID = ?
                 ORDER BY a.appointmentDate DESC";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([$userId]);
 
         $result = $stmt->get_result();
-        return $result->fetch_all(MYSQLI_ASSOC);
+        $appointments = $result->fetch_all(MYSQLI_ASSOC);
+
+        // Format the appointments array to include payment information
+        foreach ($appointments as &$appointment) {
+            if ($appointment['payment_id']) {
+                $appointment['payment'] = [
+                    'ID' => $appointment['payment_id'],
+                    'amount' => $appointment['payment_amount'],
+                    'status' => $appointment['payment_status']
+                ];
+            } else {
+                $appointment['payment'] = [
+                    'status' => 'unpaid'
+                ];
+            }
+            unset($appointment['payment_id'], $appointment['payment_amount'], $appointment['payment_status']);
+        }
+
+        return $appointments;
     }
 
     /**

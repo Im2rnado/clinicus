@@ -27,7 +27,7 @@ $title = "Payment Details - Clinicus";
                                 </p>
                                 <p><strong>Payment Method:</strong><br>
                                     <span class="badge bg-info">
-                                        <?php echo ucfirst(str_replace('_', ' ', $payment['paymentMethod'])); ?>
+                                        <?php echo htmlspecialchars($payment['paymentMethodName']); ?>
                                     </span>
                                 </p>
                             </div>

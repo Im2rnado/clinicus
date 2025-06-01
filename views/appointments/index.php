@@ -43,37 +43,34 @@ $title = "My Appointments - Clinicus";
                             <tr>
                                 <td>
                                     <?php echo date('M d, Y', strtotime($appointment['appointmentDate'])); ?><br>
-                                    <small class="text-muted">
-                                        <?php echo date('h:i A', strtotime($appointment['appointmentTime'])); ?>
-                                    </small>
+
                                 </td>
                                 <td>
                                     Dr.
-                                    <?php echo htmlspecialchars($appointment['doctorName'] . ' ' . $appointment['doctorLastName']); ?>
+                                    <?php echo htmlspecialchars($appointment['doctorName']); ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($appointment['specialization']); ?></td>
                                 <td>
-                                    <span class="badge bg-<?php
-                                    echo match ($appointment['status']) {
-                                        'scheduled' => 'primary',
-                                        'completed' => 'success',
-                                        'cancelled' => 'danger',
-                                        default => 'secondary'
-                                    };
-                                    ?>">
-                                        <?php echo ucfirst($appointment['status']); ?>
+                                    <span class="badge bg-<?php echo $appointment['statusColor']; ?>">
+                                        <?php echo $appointment['status']; ?>
                                     </span>
                                 </td>
                                 <td>
                                     <?php if (isset($appointment['payment'])): ?>
-                                        <span
-                                            class="badge bg-<?php echo $appointment['payment']['status'] === 'completed' ? 'success' : 'warning'; ?>">
-                                            <?php echo ucfirst($appointment['payment']['status']); ?>
-                                        </span>
-                                        <br>
-                                        <small class="text-muted">
-                                            $<?php echo number_format($appointment['payment']['amount'], 2); ?>
-                                        </small>
+                                        <?php if ($appointment['payment']['status'] === 'unpaid'): ?>
+                                            <span class="badge bg-danger">Unpaid</span>
+                                        <?php else: ?>
+                                            <span
+                                                class="badge bg-<?php echo $appointment['payment']['status'] === 'completed' ? 'success' : 'warning'; ?>">
+                                                <?php echo ucfirst($appointment['payment']['status']); ?>
+                                            </span>
+                                            <?php if (isset($appointment['payment']['amount'])): ?>
+                                                <br>
+                                                <small class="text-muted">
+                                                    $<?php echo number_format($appointment['payment']['amount'], 2); ?>
+                                                </small>
+                                            <?php endif; ?>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="badge bg-danger">Unpaid</span>
                                     <?php endif; ?>
@@ -81,20 +78,21 @@ $title = "My Appointments - Clinicus";
                                 <td>
                                     <div class="btn-group">
                                         <a href="/clinicus/appointments/view/<?php echo $appointment['ID']; ?>"
-                                            class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i>
+                                            class="btn btn-sm btn-outline-primary" title="View Details">
+                                            <i class="fas fa-eye">View</i>
                                         </a>
-                                        <?php if ($appointment['status'] === 'scheduled'): ?>
+                                        <?php if ($appointment['status'] === 'Pending' || $appointment['status'] === 'Confirmed'): ?>
                                             <a href="/clinicus/appointments/cancel/<?php echo $appointment['ID']; ?>"
                                                 class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Are you sure you want to cancel this appointment?')">
-                                                <i class="fas fa-times"></i>
+                                                onclick="return confirm('Are you sure you want to cancel this appointment?')"
+                                                title="Cancel Appointment">
+                                                <i class="fas fa-times">Cancel</i>
                                             </a>
                                         <?php endif; ?>
-                                        <?php if (isset($appointment['payment'])): ?>
+                                        <?php if ($appointment['payment']['status'] !== 'completed' && $appointment['status'] !== 'Cancelled'): ?>
                                             <a href="/clinicus/payments/show/<?php echo $appointment['payment']['ID']; ?>"
-                                                class="btn btn-sm btn-outline-info">
-                                                <i class="fas fa-receipt"></i>
+                                                class="btn btn-sm btn-outline-info" title="View Payment">
+                                                <i class="fas fa-receipt">Pay</i>
                                             </a>
                                         <?php endif; ?>
                                     </div>

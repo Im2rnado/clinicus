@@ -62,13 +62,15 @@ class Payment extends AbstractModel
                    CONCAT(u.FirstName, ' ', u.LastName) as patientName,
                    CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
                    a.appointmentDate,
-                   dt.Specialization as specialization
+                   dt.Specialization as specialization,
+                   pm.name as paymentMethodName
             FROM Payment p
             JOIN Users u ON p.userID = u.userID
             JOIN Appointment a ON p.appointmentID = a.ID
             JOIN Users d ON a.DoctorID = d.userID
             JOIN Doctors doc ON a.DoctorID = doc.ID
             JOIN doctor_types dt ON doc.doctorType = dt.ID
+            LEFT JOIN Payment_Methods pm ON p.paymentMethod = pm.ID
             WHERE p.ID = ?
         ");
 
@@ -118,10 +120,12 @@ class Payment extends AbstractModel
             SELECT p.*, 
                    CONCAT(d.FirstName, ' ', d.LastName) as doctorName,
                    a.appointmentDate,
-                   DATE_FORMAT(p.createdAt, '%M %d, %Y') as formattedDate
+                   DATE_FORMAT(p.createdAt, '%M %d, %Y') as formattedDate,
+                   pm.name as paymentMethodName
             FROM Payment p
             JOIN Appointment a ON p.appointmentID = a.ID
             JOIN Users d ON a.DoctorID = d.userID
+            LEFT JOIN Payment_Methods pm ON p.paymentMethod = pm.ID
             WHERE p.userID = ?
             ORDER BY p.createdAt DESC
         ");

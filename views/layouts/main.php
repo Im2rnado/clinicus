@@ -199,7 +199,7 @@
                                     </a>
                                 </li>
                                 <li class="nav-item">
-                                    <a class="nav-link" href="/clinicus/patient/appointments">
+                                    <a class="nav-link" href="/clinicus/appointments">
                                         <i class="bi bi-calendar-check me-1"></i>
                                         Appointments
                                     </a>

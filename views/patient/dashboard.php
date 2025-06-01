@@ -45,7 +45,7 @@ $title = "Patient Dashboard - Clinicus";
                     </div>
                 <?php endif; ?>
                 <div class="text-end mt-3">
-                    <a href="/clinicus/patient/appointments" class="btn btn-primary">View All Appointments</a>
+                    <a href="/clinicus/appointments" class="btn btn-primary">View All Appointments</a>
                 </div>
             </div>
         </div>

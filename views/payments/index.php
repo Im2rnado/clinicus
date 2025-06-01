@@ -46,7 +46,7 @@ $title = "Payment History - Clinicus";
                                 <td>$<?php echo number_format($payment['amount'], 2); ?></td>
                                 <td>
                                     <span class="badge bg-info">
-                                        <?php echo ucfirst(str_replace('_', ' ', $payment['paymentMethod'])); ?>
+                                        <?php echo ucfirst($payment['paymentMethodName']); ?>
                                     </span>
                                 </td>
                                 <td>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3307
--- Generation Time: May 31, 2025 at 01:33 PM
+-- Generation Time: Jun 01, 2025 at 05:42 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -59,6 +59,7 @@ CREATE TABLE `appointment` (
   `ID` int(11) NOT NULL,
   `DoctorID` int(11) NOT NULL,
   `userID` int(11) NOT NULL,
+  `reason` varchar(100) NOT NULL,
   `appointmentDate` datetime NOT NULL,
   `status` int(11) DEFAULT 0,
   `createdAt` datetime DEFAULT current_timestamp(),
@@ -69,12 +70,17 @@ CREATE TABLE `appointment` (
 -- Dumping data for table `appointment`
 --
 
-INSERT INTO `appointment` (`ID`, `DoctorID`, `userID`, `appointmentDate`, `status`, `createdAt`, `updatedAt`) VALUES
-(1, 1, 2, '2025-05-26 10:00:00', 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(2, 2, 7, '2025-05-27 14:30:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(3, 3, 8, '2025-05-28 09:15:00', 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(4, 1, 2, '2025-05-29 11:00:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(5, 2, 7, '2025-05-30 16:00:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35');
+INSERT INTO `appointment` (`ID`, `DoctorID`, `userID`, `reason`, `appointmentDate`, `status`, `createdAt`, `updatedAt`) VALUES
+(1, 1, 2, '', '2025-05-26 10:00:00', 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(2, 2, 7, '', '2025-05-27 14:30:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(3, 3, 8, '', '2025-05-28 09:15:00', 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(4, 1, 2, '', '2025-05-29 11:00:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(5, 2, 7, '', '2025-05-30 16:00:00', 0, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(10, 1, 9, 'hello', '2025-08-20 16:00:00', 2, '2025-06-01 00:47:08', '2025-06-01 06:02:38'),
+(11, 3, 9, 'bawaseer', '2025-06-30 16:30:00', 1, '2025-06-01 00:56:32', '2025-06-01 00:58:30'),
+(12, 2, 9, 'bitch', '2025-06-12 12:30:00', 2, '2025-06-01 06:08:30', '2025-06-01 06:09:40'),
+(13, 2, 9, 'd', '2025-06-01 17:00:00', 0, '2025-06-01 06:09:59', '2025-06-01 06:09:59'),
+(14, 2, 9, 'd', '2025-06-01 17:00:00', 2, '2025-06-01 06:10:31', '2025-06-01 06:10:43');
 
 -- --------------------------------------------------------
 
@@ -230,9 +236,9 @@ CREATE TABLE `doctors` (
 --
 
 INSERT INTO `doctors` (`ID`, `userID`, `yearsOfExperince`, `rating`, `doctorType`, `createdAt`, `updatedAt`, `consultation_fee`) VALUES
-(1, 1, 15, 95, 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35', 0.00),
-(2, 3, 20, 98, 3, '2025-05-25 20:45:35', '2025-05-25 20:45:35', 0.00),
-(3, 5, 12, 92, 5, '2025-05-25 20:45:35', '2025-05-25 20:45:35', 0.00);
+(1, 1, 15, 95, 1, '2025-05-25 20:45:35', '2025-05-31 22:40:49', 100.00),
+(2, 3, 20, 98, 3, '2025-05-25 20:45:35', '2025-05-31 22:40:54', 100.00),
+(3, 5, 12, 92, 5, '2025-05-25 20:45:35', '2025-05-31 22:40:57', 100.00);
 
 -- --------------------------------------------------------
 
@@ -603,6 +609,35 @@ INSERT INTO `patient_insurance` (`ID`, `patientID`, `providerID`, `insuranceNO`,
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `payment`
+--
+
+CREATE TABLE `payment` (
+  `ID` int(11) NOT NULL,
+  `appointmentID` int(11) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `amount` decimal(10,2) NOT NULL,
+  `paymentMethod` int(11) NOT NULL,
+  `status` enum('pending','completed','failed','refunded') DEFAULT 'pending',
+  `transactionID` varchar(50) DEFAULT NULL,
+  `createdAt` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updatedAt` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `payment`
+--
+
+INSERT INTO `payment` (`ID`, `appointmentID`, `userID`, `amount`, `paymentMethod`, `status`, `transactionID`, `createdAt`, `updatedAt`) VALUES
+(4, 1, 9, 100.00, 1, 'pending', 'TRANS_683b78dc3a557', '2025-05-31 21:47:08', '2025-05-31 21:47:08'),
+(5, 1, 9, 100.00, 3, 'completed', 'TRANS_683b7b10859dc', '2025-05-31 21:56:32', '2025-05-31 21:57:24'),
+(6, 1, 9, 100.00, 1, 'pending', 'TRANS_683bc42ef1cde', '2025-06-01 03:08:30', '2025-06-01 03:08:30'),
+(7, 1, 9, 100.00, 1, 'pending', 'TRANS_683bc4870a957', '2025-06-01 03:09:59', '2025-06-01 03:09:59'),
+(8, 1, 9, 100.00, 1, 'pending', 'TRANS_683bc4a7d782b', '2025-06-01 03:10:31', '2025-06-01 03:10:31');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `payment_methods`
 --
 
@@ -938,11 +973,11 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`userID`, `FirstName`, `LastName`, `username`, `email`, `phone`, `password`, `dob`, `addressID`, `roleID`, `createdAt`, `updatedAt`) VALUES
-(1, 'Ahmed', 'Hassan', 'ahmed.hassan', '', '', 'hashed_password_1', '1980-05-15 00:00:00', 1, 2, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(1, 'Ahmed', 'Hatem', 'ahmed.hatem', 'ahmed.hatem23d@eslsca.edu.eg', '01114444100', '$2y$10$eLZovqj5WuEI8dnfUS/pnO5H8rQ6qZcgjk3FNp9xjmOyPoTNQyJVO', '1980-05-15 00:00:00', 1, 2, '2025-05-25 20:45:35', '2025-06-01 02:30:10'),
 (2, 'Fatma', 'Mohamed', 'fatma.mohamed', '', '', 'hashed_password_2', '1985-08-22 00:00:00', 2, 3, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (3, 'Omar', 'Ali', 'omar.ali', '', '', 'hashed_password_3', '1975-12-10 00:00:00', 3, 2, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (4, 'Nadia', 'Ibrahim', 'nadia.ibrahim', '', '', 'hashed_password_4', '1990-03-18 00:00:00', 4, 4, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(5, 'Khaled', 'Mahmoud', 'khaled.mahmoud', '', '', 'hashed_password_5', '1978-07-25 00:00:00', 5, 1, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
+(5, 'Ahmed', 'Khattab', 'ahmed.khattab', 'ahmed.khattab23d@eslsca.edu.eg', '01118670650', '$2y$10$eLZovqj5WuEI8dnfUS/pnO5H8rQ6qZcgjk3FNp9xjmOyPoTNQyJVO', '2006-02-12 00:00:00', 8, 1, '2025-05-25 20:45:35', '2025-06-01 01:01:18'),
 (6, 'Amira', 'Youssef', 'amira.youssef', '', '', 'hashed_password_6', '1988-11-12 00:00:00', 6, 5, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (7, 'Mostafa', 'Abdel Rahman', 'mostafa.abdel', '', '', 'hashed_password_7', '1982-09-05 00:00:00', 7, 3, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (8, 'Mona', 'Farouk', 'mona.farouk', '', '', 'hashed_password_8', '1987-04-28 00:00:00', 8, 6, '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
@@ -971,8 +1006,7 @@ INSERT INTO `user_types` (`userTypeID`, `Type`, `createdAt`, `updatedAt`) VALUES
 (3, 'Patient', '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (4, 'Nurse', '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
 (5, 'Receptionist', '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(6, 'Pharmacist', '2025-05-25 20:45:35', '2025-05-25 20:45:35'),
-(7, 'Manager', '2025-05-25 20:45:35', '2025-05-25 20:45:35');
+(6, 'Pharmacist', '2025-05-25 20:45:35', '2025-05-25 20:45:35');
 
 -- --------------------------------------------------------
 
@@ -1196,6 +1230,15 @@ ALTER TABLE `patient_insurance`
   ADD KEY `providerID` (`providerID`);
 
 --
+-- Indexes for table `payment`
+--
+ALTER TABLE `payment`
+  ADD PRIMARY KEY (`ID`),
+  ADD KEY `appointmentID` (`appointmentID`),
+  ADD KEY `userID` (`userID`),
+  ADD KEY `paymentMethod` (`paymentMethod`);
+
+--
 -- Indexes for table `payment_methods`
 --
 ALTER TABLE `payment_methods`
@@ -1327,7 +1370,7 @@ ALTER TABLE `address`
 -- AUTO_INCREMENT for table `appointment`
 --
 ALTER TABLE `appointment`
-  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `appointment_details`
@@ -1448,6 +1491,12 @@ ALTER TABLE `patients`
 --
 ALTER TABLE `patient_insurance`
   MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
+-- AUTO_INCREMENT for table `payment`
+--
+ALTER TABLE `payment`
+  MODIFY `ID` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `payment_methods`
@@ -1625,6 +1674,14 @@ ALTER TABLE `patients`
 ALTER TABLE `patient_insurance`
   ADD CONSTRAINT `patient_insurance_ibfk_1` FOREIGN KEY (`patientID`) REFERENCES `patients` (`ID`),
   ADD CONSTRAINT `patient_insurance_ibfk_2` FOREIGN KEY (`providerID`) REFERENCES `insurance_provider` (`ID`);
+
+--
+-- Constraints for table `payment`
+--
+ALTER TABLE `payment`
+  ADD CONSTRAINT `payment_ibfk_1` FOREIGN KEY (`appointmentID`) REFERENCES `appointment` (`ID`),
+  ADD CONSTRAINT `payment_ibfk_2` FOREIGN KEY (`userID`) REFERENCES `users` (`userID`),
+  ADD CONSTRAINT `payment_ibfk_3` FOREIGN KEY (`paymentMethod`) REFERENCES `payment_methods` (`ID`);
 
 --
 -- Constraints for table `payment_method_options`

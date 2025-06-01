@@ -61,7 +61,7 @@ class PatientController extends Controller
         $patientId = $_SESSION['user_id'];
         $appointments = $this->appointmentModel->getAllAppointments($patientId);
 
-        $this->render('patient/appointments', [
+        $this->render('appointments', [
             'title' => 'My Appointments',
             'appointments' => $appointments
         ]);
@@ -242,7 +242,7 @@ class PatientController extends Controller
         $appointment = $this->appointmentModel->read($appointmentId);
         if (!$appointment || $appointment['userID'] != $_SESSION['user_id']) {
             $_SESSION['error'] = "Invalid appointment or unauthorized access.";
-            header('Location: /clinicus/patient/appointments');
+            header('Location: /clinicus/appointments');
             exit;
         }
 
@@ -250,13 +250,13 @@ class PatientController extends Controller
         $appointmentDate = strtotime($appointment['appointmentDate']);
         if ($appointmentDate < time()) {
             $_SESSION['error'] = "Cannot cancel past appointments.";
-            header('Location: /clinicus/patient/appointments');
+            header('Location: /clinicus/appointments');
             exit;
         }
 
         if ($appointment['status'] == 2) { // 2 = cancelled
             $_SESSION['error'] = "Appointment is already cancelled.";
-            header('Location: /clinicus/patient/appointments');
+            header('Location: /appointments');
             exit;
         }
 
@@ -269,7 +269,7 @@ class PatientController extends Controller
             $_SESSION['error'] = "Failed to cancel appointment.";
         }
 
-        header('Location: /clinicus/patient/appointments');
+        header('Location: /clinicus/appointments');
         exit;
     }
 }
