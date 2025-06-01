@@ -36,7 +36,10 @@ class Appointment implements iAppointmentActions
                 $data['status']
             ]);
 
-            return $result;
+            if ($result) {
+                return $this->db->insert_id; // Return the new appointment ID
+            }
+            return false;
         } catch (\Exception $e) {
             error_log('Exception in Appointment::create: ' . $e->getMessage());
             return false;
