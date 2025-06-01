@@ -138,7 +138,7 @@ $title = "Register - Clinicus";
                             <div class="col-md-6 mb-3">
                                 <label for="role" class="form-label">Role</label>
                                 <select class="form-select <?php echo isset($errors['role']) ? 'is-invalid' : ''; ?>"
-                                    id="role" name="role" required>
+                                    id="role" name="role" required onchange="toggleDoctorFields()">
                                     <option value="">Select Role</option>
                                     <option value="1" <?php echo (isset($role) && $role == '1') ? 'selected' : ''; ?>>
                                         Patient</option>
@@ -150,6 +150,51 @@ $title = "Register - Clinicus";
                                 <?php if (isset($errors['role'])): ?>
                                     <div class="invalid-feedback"><?php echo $errors['role']; ?></div>
                                 <?php endif; ?>
+                            </div>
+
+                            <!-- Doctor-specific fields -->
+                            <div id="doctorFields" style="display: none;">
+                                <div class="col-md-6 mb-3">
+                                    <label for="doctorType" class="form-label">Specialization</label>
+                                    <select class="form-select <?php echo isset($errors['doctorType']) ? 'is-invalid' : ''; ?>"
+                                        id="doctorType" name="doctorType">
+                                        <option value="">Select Specialization</option>
+                                        <?php foreach ($specializations ?? [] as $spec): ?>
+                                            <option value="<?php echo $spec['ID']; ?>" 
+                                                <?php echo (isset($doctorType) && $doctorType == $spec['ID']) ? 'selected' : ''; ?>>
+                                                <?php echo htmlspecialchars($spec['Specialization']); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <?php if (isset($errors['doctorType'])): ?>
+                                        <div class="invalid-feedback"><?php echo $errors['doctorType']; ?></div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="yearsOfExperience" class="form-label">Years of Experience</label>
+                                    <input type="number" min="0" max="50"
+                                        class="form-control <?php echo isset($errors['yearsOfExperience']) ? 'is-invalid' : ''; ?>"
+                                        id="yearsOfExperience" name="yearsOfExperience" 
+                                        value="<?php echo $yearsOfExperience ?? ''; ?>">
+                                    <?php if (isset($errors['yearsOfExperience'])): ?>
+                                        <div class="invalid-feedback"><?php echo $errors['yearsOfExperience']; ?></div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="consultation_fee" class="form-label">Consultation Fee</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">$</span>
+                                        <input type="number" min="0" step="0.01"
+                                            class="form-control <?php echo isset($errors['consultation_fee']) ? 'is-invalid' : ''; ?>"
+                                            id="consultation_fee" name="consultation_fee" 
+                                            value="<?php echo $consultation_fee ?? ''; ?>">
+                                    </div>
+                                    <?php if (isset($errors['consultation_fee'])): ?>
+                                        <div class="invalid-feedback"><?php echo $errors['consultation_fee']; ?></div>
+                                    <?php endif; ?>
+                                </div>
                             </div>
 
                             <!-- Account Information -->
@@ -213,6 +258,30 @@ $title = "Register - Clinicus";
                 }, false)
             })
         })()
+
+        // Toggle doctor fields based on role selection
+        function toggleDoctorFields() {
+            const roleSelect = document.getElementById('role');
+            const doctorFields = document.getElementById('doctorFields');
+            const doctorType = document.getElementById('doctorType');
+            const yearsOfExperience = document.getElementById('yearsOfExperience');
+            const consultation_fee = document.getElementById('consultation_fee');
+
+            if (roleSelect.value === '2') {
+                doctorFields.style.display = 'block';
+                doctorType.required = true;
+                yearsOfExperience.required = true;
+                consultation_fee.required = true;
+            } else {
+                doctorFields.style.display = 'none';
+                doctorType.required = false;
+                yearsOfExperience.required = false;
+                consultation_fee.required = false;
+            }
+        }
+
+        // Call on page load to set initial state
+        document.addEventListener('DOMContentLoaded', toggleDoctorFields);
     </script>
 </body>
 

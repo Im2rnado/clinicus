@@ -81,6 +81,11 @@ class AuthController extends Controller
             $password = $_POST['password'] ?? '';
             $confirm_password = $_POST['confirm_password'] ?? '';
 
+            // Get doctor-specific fields if role is doctor
+            $doctorType = trim($_POST['doctorType'] ?? '');
+            $yearsOfExperience = trim($_POST['yearsOfExperience'] ?? '');
+            $consultation_fee = trim($_POST['consultation_fee'] ?? '');
+
             // Validate first name
             if (empty($first_name)) {
                 $errors['first_name'] = 'First name is required';
@@ -129,6 +134,23 @@ class AuthController extends Controller
                 $errors['role'] = 'Invalid role selected';
             }
 
+            // Validate doctor-specific fields if role is doctor
+            if ($role === '2') {
+                if (empty($doctorType)) {
+                    $errors['doctorType'] = 'Specialization is required';
+                }
+                if (empty($yearsOfExperience)) {
+                    $errors['yearsOfExperience'] = 'Years of experience is required';
+                } elseif (!is_numeric($yearsOfExperience) || $yearsOfExperience < 0 || $yearsOfExperience > 50) {
+                    $errors['yearsOfExperience'] = 'Years of experience must be between 0 and 50';
+                }
+                if (empty($consultation_fee)) {
+                    $errors['consultation_fee'] = 'Consultation fee is required';
+                } elseif (!is_numeric($consultation_fee) || $consultation_fee < 0) {
+                    $errors['consultation_fee'] = 'Consultation fee must be a positive number';
+                }
+            }
+
             // Validate username
             if (empty($username)) {
                 $errors['username'] = 'Username is required';
@@ -171,7 +193,7 @@ class AuthController extends Controller
 
                     // Then create the user with the address ID
                     $user = new User($this->db);
-                    $result = $user->create([
+                    $userId = $user->create([
                         'FirstName' => $first_name,
                         'LastName' => $last_name,
                         'email' => $email,
@@ -183,13 +205,29 @@ class AuthController extends Controller
                         'password' => password_hash($password, PASSWORD_DEFAULT)
                     ]);
 
-                    if ($result) {
-                        $_SESSION['success'] = 'Registration successful! Please login.';
-                        header('Location: /clinicus/auth/login');
-                        exit;
-                    } else {
-                        $errors['register'] = 'Registration failed. Please try again.';
+                    if (!$userId) {
+                        throw new \Exception('Failed to create user');
                     }
+
+                    // If role is doctor, create doctor record
+                    if ($role === '2') {
+                        $doctorModel = new \Model\entities\Doctor($this->db);
+                        $doctorCreated = $doctorModel->create([
+                            'userID' => $userId,
+                            'doctorType' => $doctorType,
+                            'yearsOfExperince' => $yearsOfExperience,
+                            'rating' => 0,
+                            'consultation_fee' => $consultation_fee
+                        ]);
+
+                        if (!$doctorCreated) {
+                            throw new \Exception('Failed to create doctor record');
+                        }
+                    }
+
+                    $_SESSION['success'] = 'Registration successful! Please login.';
+                    header('Location: /clinicus/auth/login');
+                    exit;
                 } catch (\Exception $e) {
                     $errors['register'] = 'An error occurred during registration. ' . $e->getMessage();
                 }
@@ -205,11 +243,17 @@ class AuthController extends Controller
                 'address' => $address,
                 'dob' => $dob,
                 'role' => $role,
-                'username' => $username
+                'username' => $username,
+                'doctorType' => $doctorType,
+                'yearsOfExperience' => $yearsOfExperience,
+                'consultation_fee' => $consultation_fee,
+                'specializations' => (new \Model\entities\Doctor($this->db))->getAllSpecializations()
             ]);
         } else {
-            // Show registration form
-            $this->render('auth/register');
+            // Show registration form with specializations
+            $this->render('auth/register', [
+                'specializations' => (new \Model\entities\Doctor($this->db))->getAllSpecializations()
+            ]);
         }
     }
 
