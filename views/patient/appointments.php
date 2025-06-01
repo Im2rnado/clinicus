@@ -11,6 +11,26 @@ $title = "My Appointments - Clinicus";
             </a>
         </div>
 
+        <?php if (isset($_SESSION['success'])): ?>
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <?php
+                echo $_SESSION['success'];
+                unset($_SESSION['success']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
+        <?php if (isset($_SESSION['error'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <?php
+                echo $_SESSION['error'];
+                unset($_SESSION['error']);
+                ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        <?php endif; ?>
+
         <?php if (empty($appointments)): ?>
             <div class="alert alert-info">
                 <i class="fas fa-info-circle"></i> You have no appointments yet.
@@ -53,11 +73,12 @@ $title = "My Appointments - Clinicus";
                                     <?php endif; ?>
                                 </td>
                                 <td>
-                                    <?php if ($appointment['status'] == 0): ?>
-                                        <button class="btn btn-sm btn-danger"
-                                            onclick="cancelAppointment(<?php echo $appointment['ID']; ?>)">
+                                    <?php if ($appointment['status'] == 0 || $appointment['status'] == 1): ?>
+                                        <a href="/clinicus/patient/cancelAppointment/<?php echo $appointment['ID']; ?>"
+                                            class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure you want to cancel this appointment?');">
                                             <i class="fas fa-times"></i> Cancel
-                                        </button>
+                                        </a>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -68,12 +89,3 @@ $title = "My Appointments - Clinicus";
         <?php endif; ?>
     </div>
 </div>
-
-<script>
-    function cancelAppointment(appointmentId) {
-        if (confirm('Are you sure you want to cancel this appointment?')) {
-            // TODO: Implement appointment cancellation
-            alert('Appointment cancellation will be implemented soon.');
-        }
-    }
-</script>

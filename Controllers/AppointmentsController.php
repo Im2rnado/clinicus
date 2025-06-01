@@ -27,6 +27,25 @@ class AppointmentsController extends Controller
         ]);
     }
 
+    private function isTimeSlotAvailable($doctorId, $date, $time)
+    {
+        // Check if there's an active appointment (not cancelled) for this doctor at the given date and time
+        $sql = "SELECT COUNT(*) as count FROM Appointment 
+                WHERE DoctorID = ? 
+                AND DATE(appointmentDate) = ? 
+                AND TIME(appointmentDate) = ? 
+                AND status != 2"; // 2 is cancelled status
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bind_param("iss", $doctorId, $date, $time);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $stmt->close();
+
+        return $row['count'] == 0;
+    }
+
     public function create()
     {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -67,6 +86,22 @@ class AppointmentsController extends Controller
                 }
 
                 if (empty($errors)) {
+                    // Check if the time slot is available
+                    if (!$this->isTimeSlotAvailable($doctorId, $appointmentDate, $appointmentTime)) {
+                        $errors['time_slot'] = 'This time slot is already booked. Please select a different time.';
+                        $this->render('appointments/create', [
+                            'step' => 2,
+                            'errors' => $errors,
+                            'doctors' => $this->doctorModel->getDoctorsBySpecialization($_POST['specialization']),
+                            'specialization' => $_POST['specialization'],
+                            'doctor_id' => $doctorId,
+                            'appointment_date' => $appointmentDate,
+                            'appointment_time' => $appointmentTime,
+                            'reason' => $reason
+                        ]);
+                        return;
+                    }
+
                     // Get doctor details for payment
                     $doctor = $this->doctorModel->read($doctorId);
                     // Convert doctor object to array
@@ -109,6 +144,11 @@ class AppointmentsController extends Controller
             // Handle final payment submission
             if (isset($_POST['payment_method'])) {
                 try {
+                    // Check if the time slot is still available before proceeding
+                    if (!$this->isTimeSlotAvailable($_POST['doctor_id'], $_POST['appointment_date'], $_POST['appointment_time'])) {
+                        throw new Exception('This time slot is no longer available. Please select a different time.');
+                    }
+
                     // Start transaction
                     $this->db->begin_transaction();
 
@@ -158,7 +198,7 @@ class AppointmentsController extends Controller
                     $_SESSION['success'] = 'Appointment booked successfully! Please complete the payment.';
 
                     // Redirect to payment confirmation page
-                    header('Location: /clinicus/payments/' . $paymentId);
+                    header('Location: /clinicus/payments/show/' . $paymentId);
                     exit;
 
                 } catch (Exception $e) {

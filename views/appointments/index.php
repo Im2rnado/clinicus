@@ -49,7 +49,7 @@ $title = "My Appointments - Clinicus";
                                 </td>
                                 <td>
                                     Dr.
-                                    <?php echo htmlspecialchars($appointment['doctorFirstName'] . ' ' . $appointment['doctorLastName']); ?>
+                                    <?php echo htmlspecialchars($appointment['doctorName'] . ' ' . $appointment['doctorLastName']); ?>
                                 </td>
                                 <td><?php echo htmlspecialchars($appointment['specialization']); ?></td>
                                 <td>
@@ -92,7 +92,7 @@ $title = "My Appointments - Clinicus";
                                             </a>
                                         <?php endif; ?>
                                         <?php if (isset($appointment['payment'])): ?>
-                                            <a href="/clinicus/payments/view/<?php echo $appointment['payment']['ID']; ?>"
+                                            <a href="/clinicus/payments/show/<?php echo $appointment['payment']['ID']; ?>"
                                                 class="btn btn-sm btn-outline-info">
                                                 <i class="fas fa-receipt"></i>
                                             </a>

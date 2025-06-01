@@ -188,18 +188,18 @@ class PatientController extends Controller
             ]);
         } else {
             // Get current user data
-            $user = $this->userModel->read(id: $userId);
-            $address = $this->addressModel->read($user->addressID);
+            $user = $this->userModel->read($userId);
+            $address = $this->addressModel->read($user['addressID']);
 
             $this->render('patient/profile', [
                 'title' => 'My Profile',
                 'user' => [
-                    'first_name' => $user->FirstName,
-                    'last_name' => $user->LastName,
-                    'email' => $user->email,
-                    'phone' => $user->phone,
+                    'first_name' => $user['FirstName'],
+                    'last_name' => $user['LastName'],
+                    'email' => $user['email'],
+                    'phone' => $user['phone'],
                     'address' => $address->name,
-                    'dob' => $user->dob
+                    'dob' => $user['dob']
                 ]
             ]);
         }
@@ -229,5 +229,47 @@ class PatientController extends Controller
             'title' => 'My Messages',
             'messages' => $messages
         ]);
+    }
+
+    public function cancelAppointment($appointmentId)
+    {
+        if (!isset($_SESSION['user_id'])) {
+            header('Location: /clinicus/auth/login');
+            exit;
+        }
+
+        // Verify the appointment belongs to the patient
+        $appointment = $this->appointmentModel->read($appointmentId);
+        if (!$appointment || $appointment['userID'] != $_SESSION['user_id']) {
+            $_SESSION['error'] = "Invalid appointment or unauthorized access.";
+            header('Location: /clinicus/patient/appointments');
+            exit;
+        }
+
+        // Check if appointment is in the future and not already cancelled
+        $appointmentDate = strtotime($appointment['appointmentDate']);
+        if ($appointmentDate < time()) {
+            $_SESSION['error'] = "Cannot cancel past appointments.";
+            header('Location: /clinicus/patient/appointments');
+            exit;
+        }
+
+        if ($appointment['status'] == 2) { // 2 = cancelled
+            $_SESSION['error'] = "Appointment is already cancelled.";
+            header('Location: /clinicus/patient/appointments');
+            exit;
+        }
+
+        // Update appointment status to cancelled (2)
+        $result = $this->appointmentModel->updateStatus($appointmentId, 2);
+
+        if ($result) {
+            $_SESSION['success'] = "Appointment cancelled successfully.";
+        } else {
+            $_SESSION['error'] = "Failed to cancel appointment.";
+        }
+
+        header('Location: /clinicus/patient/appointments');
+        exit;
     }
 }

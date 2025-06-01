@@ -72,7 +72,7 @@ $title = "Book Appointment - Clinicus";
                                             <label class="form-check-label" for="doctor_<?php echo $doctor['ID']; ?>">
                                                 <h5 class="card-title mb-1">
                                                     Dr.
-                                                    <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
+                                                    <?php echo htmlspecialchars($doctor['doctorName']); ?>
                                                 </h5>
                                                 <p class="card-text text-muted mb-2">
                                                     <i class="fas fa-graduation-cap me-2"></i>
@@ -116,6 +116,11 @@ $title = "Book Appointment - Clinicus";
                                 }
                                 ?>
                             </select>
+                            <?php if (isset($errors['time_slot'])): ?>
+                                <div class="text-danger mt-1">
+                                    <?php echo htmlspecialchars($errors['time_slot']); ?>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -155,7 +160,7 @@ $title = "Book Appointment - Clinicus";
                         <div class="row">
                             <div class="col-md-6">
                                 <p><strong>Doctor:</strong> Dr.
-                                    <?php echo htmlspecialchars($doctor['FirstName'] . ' ' . $doctor['LastName']); ?>
+                                    <?php echo htmlspecialchars($doctor['doctorName']); ?>
                                 </p>
                                 <p><strong>Specialization:</strong>
                                     <?php echo htmlspecialchars($doctor['specialization']); ?></p>
