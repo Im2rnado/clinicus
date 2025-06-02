@@ -5,6 +5,7 @@ require_once __DIR__ . "/../Model/autoload.php";
 
 include_once __DIR__ . "/../Model/entities/Address.php";
 include_once __DIR__ . "/../Model/entities/User.php";
+include_once __DIR__ . "/../Model/entities/Doctor.php";
 
 use Model\entities\User;
 use Model\entities\Address;

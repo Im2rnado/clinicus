@@ -141,11 +141,11 @@ $title = "Register - Clinicus";
                                     id="role" name="role" required onchange="toggleDoctorFields()">
                                     <option value="">Select Role</option>
                                     <option value="1" <?php echo (isset($role) && $role == '1') ? 'selected' : ''; ?>>
-                                        Patient</option>
+                                        Admin</option>
                                     <option value="2" <?php echo (isset($role) && $role == '2') ? 'selected' : ''; ?>>
                                         Doctor</option>
                                     <option value="3" <?php echo (isset($role) && $role == '3') ? 'selected' : ''; ?>>
-                                        Staff</option>
+                                        Patient</option>
                                 </select>
                                 <?php if (isset($errors['role'])): ?>
                                     <div class="invalid-feedback"><?php echo $errors['role']; ?></div>

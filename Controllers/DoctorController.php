@@ -262,7 +262,7 @@ class DoctorController extends Controller
                     'username' => $existingUser['username'],
                     'dob' => $existingUser['dob'],
                     'addressID' => $existingUser['addressID'],
-                    'role' => $existingUser['role']
+                    'roleID' => $existingUser['roleID']
                 ];
 
                 $userUpdated = $this->userModel->update($doctorId, $userData);
